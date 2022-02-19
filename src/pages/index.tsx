@@ -8,7 +8,11 @@ import HomepageFeatures from '../components/HomepageFeatures';
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <header className='hero hero--primary heroBanner'>
+    <header className='hero hero--primary heroBanner'
+    style={{
+      background:"linear-gradient(to right, #00b09b, #96c93d)"
+    }}
+    >
       <div className="container">
         <h1 className="hero__title"
         >{siteConfig.title}</h1>

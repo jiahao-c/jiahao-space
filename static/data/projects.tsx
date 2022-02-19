@@ -8,7 +8,7 @@ export interface IProject {
 }
 export const projects:IProject[] = [{
     name:"myExams2",
-    tags:  ["React", "TypeScript", "dynamoDB", "AWS Amplify"],
+    tags:  ["React", "TypeScript", "AWS"],
     text: "A tool to look up and export exam schedules. Used by 100+ students.",
     imgSrc:"https://user-images.githubusercontent.com/8275280/154332914-d2ef1e95-2dc5-4ecd-9600-d7f5f7015214.jpg",
     demoLink:"https://myexams2.vercel.app/",

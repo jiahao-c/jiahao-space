@@ -11,7 +11,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Code pragmatist',
-    image: '/img/undraw_docusaurus_mountain.svg',
+    image: '/img/code.svg',
     description: (
       <>
         Creates tools to simplify routines.<br/>Writes docs to improve usuabilities.
@@ -20,7 +20,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'UX perfectionist',
-    image: '/img/undraw_docusaurus_tree.svg',
+    image: '/img/ux.svg',
     description: (
       <>
         Believes in human-centric design.<br/>
@@ -30,7 +30,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Opensource enthusiast',
-    image: '/img/undraw_docusaurus_react.svg',
+    image: '/img/oss.svg',
     description: (
       <>
         Enjoys learning from OSS.<br/>
