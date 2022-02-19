@@ -1,18 +1,16 @@
-/* .cardBody{
-    margin-left: 20px;
-    margin-right: 20px;
+.cardBody{
+    text-align: center;
+    margin-left: 1rem;
+    margin-right: 1rem;
 }
 
 h2{
     text-align: center;
     margin-bottom: 0px;
-    padding-bottom: 0px;
 }
-p{
-    text-align: left;
-}
+
 .tags{
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     text-align: center;
-} */
+}

@@ -79,6 +79,12 @@ const config = {
         respectPrefersColorScheme: false,
       },
     }),
+    plugins: [
+      [
+        "docusaurus-plugin-less",
+        { lessOptions: { javascriptEnabled: true } }
+      ]
+    ],
 };
 
 module.exports = config;

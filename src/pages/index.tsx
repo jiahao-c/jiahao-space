@@ -11,9 +11,6 @@ function HomepageHeader() {
     <header className='hero hero--primary heroBanner'>
       <div className="container">
         <h1 className="hero__title"
-        style={{
-          color: 'white',
-        }}
         >{siteConfig.title}</h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className='buttons'>

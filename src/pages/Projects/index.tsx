@@ -1,10 +1,11 @@
 import Layout from "@theme/Layout";
 import React from "react";
 import { projects } from "@site/static/data/projects";
-import "./projects.css";
+import "./projects.less";
 import {Space } from "antd";
 import ProjectCard from "@site/src/components/ProjectCard";
-import "antd/dist/antd.css";
+import { Masonry } from "masonic";
+// import "antd/dist/antd.css";
 
 function ProjectsHeader() {
   return (
@@ -26,27 +27,19 @@ export default function Home(): JSX.Element {
       description="Description will go into a meta tag in <head />"
     >
       <ProjectsHeader />
-      <main>
-        <Space
-        style={{
-          marginTop: "3rem",
-          paddingLeft: "6rem",
-          paddingRight: "6rem",
-        }}
-        >
-            {/* <Masonry columns={{ xs: 1, sm: 2, lg: 3 }} spacing={5}> */}
-              {projects.map((project) => (
-                <ProjectCard
-                tags={project.tags}
-                text={project.text}
-                name={project.name}
-                imgSrc={project.imgSrc}
-                demoLink={project.demoLink}
-                repoLink={project.repoLink}
-              />
-              ))}
-            {/* </Masonry> */}
-        </Space>
+      <main
+      className="antd-container"
+      >
+        <Masonry
+          // Provides the data for our grid items
+          items={projects}
+          // Adds 8px of space between the grid cells
+          columnGutter={10}
+          // Sets the minimum column width to 172px
+          columnWidth={300}
+          // This is the grid item component
+          render={ProjectCard}
+        />
       </main>
     </Layout>
   );
