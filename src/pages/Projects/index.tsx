@@ -23,7 +23,7 @@ export default function Home(): JSX.Element {
   return (
     <Layout
       title="Projects"
-      description="Description will go into a meta tag in <head />"
+      description="My side projects"
     >
       <ProjectsHeader />
       <main

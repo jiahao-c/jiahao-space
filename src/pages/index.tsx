@@ -32,7 +32,7 @@ function HomepageHeader() {
 export default function Home(): JSX.Element {
   return (
     <Layout
-      description="Description will go into a meta tag in <head />">
+      description="Jiahao's personal site for blog, notes, and portfolio">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
