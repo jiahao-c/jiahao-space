@@ -54,12 +54,12 @@ const config = {
             label: 'Projects',
           },
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/jiahao-c',
             label: 'GitHub',
             position: 'right',
           },
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://www.linkedin.com/in/jiahao-c/',
             label: 'Linkedin',
             position: 'right',
           },
