@@ -26,7 +26,11 @@ export default ({data:{ name, tags, text, imgSrc, demoLink, repoLink }} :{data:I
       <Space wrap
       >
       {tags.map(tagName => (
-        <Tag color="#38B2AC">{tagName}</Tag>
+        <Tag color="#38B2AC"
+        style={{
+          color: "white",
+        }}
+        >{tagName}</Tag>
       ))}
       </Space>
       <p>{text}</p>
