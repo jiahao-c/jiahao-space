@@ -6,7 +6,7 @@
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Hello, I\'m Jiahao',
+  title: 'Jiahao Chen',
   url: 'https://your-docusaurus-test-site.com',
   baseUrl: '/',
   onBrokenLinks: 'throw',
