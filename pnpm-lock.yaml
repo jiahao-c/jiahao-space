@@ -12,7 +12,6 @@ specifiers:
   less: ^4.1.2
   less-loader: ^10.2.0
   masonic: ^3.6.2
-  prism-react-renderer: ^1.3.1
   react: ^17.0.2
   react-dom: ^17.0.2
   typescript: ^4.5.5
@@ -20,11 +19,10 @@ specifiers:
 dependencies:
   '@ant-design/icons': 4.7.0_react-dom@17.0.2+react@17.0.2
   '@docusaurus/core': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
-  '@docusaurus/preset-classic': 2.0.0-beta.15_aa4c5736d23da5703c50a7be471ec843
+  '@docusaurus/preset-classic': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
   '@mdx-js/react': 1.6.22_react@17.0.2
   antd: 4.18.7_react-dom@17.0.2+react@17.0.2
   masonic: 3.6.2_react@17.0.2
-  prism-react-renderer: 1.3.1_react@17.0.2
   react: 17.0.2
   react-dom: 17.0.2_react@17.0.2
 
@@ -2009,7 +2007,7 @@ packages:
       - webpack-cli
     dev: false
 
-  /@docusaurus/preset-classic/2.0.0-beta.15_aa4c5736d23da5703c50a7be471ec843:
+  /@docusaurus/preset-classic/2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593:
     resolution: {integrity: sha512-3NZIXWTAzk+kOgiB8uAbD+FZv3VFR1qkU6+TW24DRenjRnXof3CkRuldhI1QI0hILm1fuJ319QRkakV8FFtXyA==}
     engines: {node: '>=14'}
     peerDependencies:
@@ -2025,8 +2023,8 @@ packages:
       '@docusaurus/plugin-google-gtag': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
       '@docusaurus/plugin-sitemap': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
       '@docusaurus/theme-classic': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
-      '@docusaurus/theme-common': 2.0.0-beta.15_aa4c5736d23da5703c50a7be471ec843
-      '@docusaurus/theme-search-algolia': 2.0.0-beta.15_aa4c5736d23da5703c50a7be471ec843
+      '@docusaurus/theme-common': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
+      '@docusaurus/theme-search-algolia': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     transitivePeerDependencies:
@@ -2109,6 +2107,41 @@ packages:
       - webpack-cli
     dev: false
 
+  /@docusaurus/theme-common/2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593:
+    resolution: {integrity: sha512-+pvarmzcyECE4nWxw+dCMKRIoes0NegrRuM9+nRsUrS/E5ywsF539kpupKIEqaMjq6AuM0CJtDoHxHHPNe0KaQ==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      prism-react-renderer: ^1.2.1
+      react: ^16.8.4 || ^17.0.0
+      react-dom: ^16.8.4 || ^17.0.0
+    dependencies:
+      '@docusaurus/plugin-content-blog': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
+      '@docusaurus/plugin-content-docs': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
+      '@docusaurus/plugin-content-pages': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
+      clsx: 1.1.1
+      parse-numeric-range: 1.3.0
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tslib: 2.3.1
+      utility-types: 3.10.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@parcel/css'
+      - '@swc/core'
+      - acorn
+      - bufferutil
+      - csso
+      - debug
+      - esbuild
+      - eslint
+      - supports-color
+      - typescript
+      - uglify-js
+      - utf-8-validate
+      - vue-template-compiler
+      - webpack-cli
+    dev: false
+
   /@docusaurus/theme-common/2.0.0-beta.15_aa4c5736d23da5703c50a7be471ec843:
     resolution: {integrity: sha512-+pvarmzcyECE4nWxw+dCMKRIoes0NegrRuM9+nRsUrS/E5ywsF539kpupKIEqaMjq6AuM0CJtDoHxHHPNe0KaQ==}
     engines: {node: '>=14'}
@@ -2145,7 +2178,7 @@ packages:
       - webpack-cli
     dev: false
 
-  /@docusaurus/theme-search-algolia/2.0.0-beta.15_aa4c5736d23da5703c50a7be471ec843:
+  /@docusaurus/theme-search-algolia/2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593:
     resolution: {integrity: sha512-XrrQKyjOPzmEuOcdsaAn1tzNJkNMA3PC86PwPZUaah0cYPpBGptcJYDlIW4VHIrCBfkQvhvmg/B3qKF6bMMi8g==}
     engines: {node: '>=14'}
     peerDependencies:
@@ -2155,7 +2188,7 @@ packages:
       '@docsearch/react': 3.0.0-alpha.50_react-dom@17.0.2+react@17.0.2
       '@docusaurus/core': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
       '@docusaurus/logger': 2.0.0-beta.15
-      '@docusaurus/theme-common': 2.0.0-beta.15_aa4c5736d23da5703c50a7be471ec843
+      '@docusaurus/theme-common': 2.0.0-beta.15_3a6359ff0dae16692fd6f0778ea71593
       '@docusaurus/theme-translations': 2.0.0-beta.15
       '@docusaurus/utils': 2.0.0-beta.15_react-dom@17.0.2+react@17.0.2
       '@docusaurus/utils-validation': 2.0.0-beta.15_react-dom@17.0.2+react@17.0.2
