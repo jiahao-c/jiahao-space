@@ -4,6 +4,7 @@ sidebar_position: 4
 
 # WIP: Fun electives at McGill
 My reflection and comments on some interesting elective courses I took at McGill university.
+
 (To be written)
 
 ## Religions of East Asia
