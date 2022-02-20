@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Stuff I learned from OSS Contributions
+# from OSS Contributions
 
 ## arco-design
 
