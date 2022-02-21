@@ -170,3 +170,17 @@ We can fix by using a less file that imports antd styles within a declaration. T
   /*other styles...*/
 }
 ```
+    
+### Docusaurus Routing 
+#### Problem
+Visiting the project page from homepage button is fine. But visiting directly from the URL `https://jiahao.vercel.app/projects` will result in a 404 error.
+![](https://i.imgur.com/SyfO3Ig.png)
+    
+My first intuition is routing issue. By diving deep into the code, I noticed that my structure is:
+    
+![](https://i.imgur.com/EdhIYxP.png)
+
+And visiting `https://jiahao.vercel.app/Projects` works fine. Therefore, the root cause is the naming of this folder. 
+    
+#### Solution  
+After renaming the folder to `projects`, problems is resolved.
