@@ -64,5 +64,13 @@ export const projects:IProject[] = [{
     text:"A zh_cn translation of Airbnb React Style Guide",
     imgSrc:"https://user-images.githubusercontent.com/8275280/154782502-5ff0b3a1-e5aa-4515-80a3-d04b28151878.png",
     repoLink:"https://github.com/jiahao-c/javascript/tree/master/react"
+},
+{
+    name:"Find a lecture",
+    tags:["BootStrap","jQuery"],
+    text:"A tool to find McGill lecture schedules by room",
+    demoLink:"https://jiahao-c.github.io/FindACourse/",
+    imgSrc:"https://camo.githubusercontent.com/406e607811bbb4647e95e999d9cb29f5fc5c804a286db394e47555357332d539/68747470733a2f2f63646e2e6a7364656c6976722e6e65742f67682f6a68636363632f46696e6441436f75727365406d61737465722f696d672f63686f6f73654275696c64696e672e706e67",
+    repoLink:"https://github.com/jiahao-c/FindACourse"
 }
 ]
