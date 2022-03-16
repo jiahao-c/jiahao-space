@@ -19,7 +19,7 @@ export const projects:IProject[] = [{
     tags:  ["React", "TypeScript", "d3.js"],
     text:"A web app for creating linguistic syntax tree. Features interactive what-you-see-is-what-you-get editor.",
     imgSrc:"https://user-images.githubusercontent.com/8275280/99976795-d71e2a00-2dde-11eb-9d27-16d2b0be0d76.png",
-    demoLink:"https://easy-syntax-tree.vercel.app/",
+    demoLink:"https://easysyntaxtree.web.app/",
     repoLink:"https://github.com/jiahao-c/easysyntaxtree-v2",
 },
 {
