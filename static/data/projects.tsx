@@ -26,7 +26,7 @@ export const projects:IProject[] = [{
     name:"Find a place",
     tags:  ["Nodejs", "Firebase"],
     text: "A Telegram Bot and a serverless function to notify course registration availability",
-    imgSrc:"https://camo.githubusercontent.com/38a962ec39f2112f03bde5f708f34af1276e35af/68747470733a2f2f63646e2e6a7364656c6976722e6e65742f67682f6a68636363632f46696e6441506c616365406d61737465722f73637265656e73686f742e706e67",
+    imgSrc:"https://user-images.githubusercontent.com/8275280/163461207-151da844-ecf5-48d8-a28a-5b315145bc9d.png",
     repoLink:"https://github.com/jiahao-c/let-me-in"
 },
 {
