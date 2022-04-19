@@ -12,7 +12,7 @@ I saw this peculiar issue in Arco (which fortunately has a screenrecording, very
 
 After reproducing it with the codesandbox link provided by the issue author, I confirmed the validity of this issue. But why?  Is it a precision issue? Is it a formatter issue? The root cause seems blurry. 
 
-Therefore, I first tried to create a **Minimal Reproducing Code Block**. I notcied that, even when there's no props passed at all （i.e. just ` <InputNumber/>`, the issue still persists. Therefore, we can first rule out Wrong API usage (i.e. passing wrong props values)
+Therefore, I first tried to create a **Minimal Reproducing Code Block**. I noticed that, even when there's no props passed at all （i.e. just ` <InputNumber/>`, the issue still persists. Therefore, we can first rule out Wrong API usage (i.e. passing wrong props values)
 
 
 I started investigation by reading the code of the `InputNumber` component and tried to understand the logic flow of its input handling.
