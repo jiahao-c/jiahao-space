@@ -10,6 +10,7 @@ specifiers:
   '@tsconfig/docusaurus': ^1.0.5
   antd: ^4.19.5
   docusaurus-plugin-less: ^2.0.2
+  dotenv: ^16.0.0
   less: ^4.1.2
   less-loader: ^10.2.0
   masonic: ^3.6.4
@@ -24,6 +25,7 @@ dependencies:
   '@mdx-js/react': 1.6.22_react@18.0.0
   '@supabase/supabase-js': 1.35.1
   antd: 4.19.5_react-dom@18.0.0+react@18.0.0
+  dotenv: 16.0.0
   masonic: 3.6.4_react@18.0.0
   react: 18.0.0
   react-dom: 18.0.0_react@18.0.0
@@ -4276,6 +4278,11 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       is-obj: 2.0.0
+    dev: false
+
+  /dotenv/16.0.0:
+    resolution: {integrity: sha512-qD9WU0MPM4SWLPJy/r2Be+2WgQj8plChsyrCNQzW/0WjvcJQiKQJ9mH3ZgB3fxbUUxgc/11ZJ0Fi5KiimWGz2Q==}
+    engines: {node: '>=12'}
     dev: false
 
   /duplexer/0.1.2:

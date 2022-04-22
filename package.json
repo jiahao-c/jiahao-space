@@ -21,6 +21,7 @@
     "@mdx-js/react": "^1.6.22",
     "@supabase/supabase-js": "^1.35.1",
     "antd": "^4.19.5",
+    "dotenv": "^16.0.0",
     "masonic": "^3.6.4",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"

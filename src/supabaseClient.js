@@ -1,6 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const {
+  siteConfig: { customFields },
+} = useDocusaurusContext();
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(
+  customFields.supabaseUrl,
+  customFields.supabaseAnonKey
+);
