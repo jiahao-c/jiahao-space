@@ -9,8 +9,8 @@ specifiers:
   '@supabase/supabase-js': ^1.35.1
   '@tsconfig/docusaurus': ^1.0.5
   antd: ^4.19.5
+  babel-plugin-transform-inline-environment-variables: ^0.4.3
   docusaurus-plugin-less: ^2.0.2
-  dotenv: ^16.0.0
   less: ^4.1.2
   less-loader: ^10.2.0
   masonic: ^3.6.4
@@ -25,7 +25,6 @@ dependencies:
   '@mdx-js/react': 1.6.22_react@18.0.0
   '@supabase/supabase-js': 1.35.1
   antd: 4.19.5_react-dom@18.0.0+react@18.0.0
-  dotenv: 16.0.0
   masonic: 3.6.4_react@18.0.0
   react: 18.0.0
   react-dom: 18.0.0_react@18.0.0
@@ -33,6 +32,7 @@ dependencies:
 devDependencies:
   '@docusaurus/module-type-aliases': 2.0.0-beta.18_react-dom@18.0.0+react@18.0.0
   '@tsconfig/docusaurus': 1.0.5
+  babel-plugin-transform-inline-environment-variables: 0.4.3
   docusaurus-plugin-less: 2.0.2_d1f5beaf18d914a19814d77b5e692b3b
   less: 4.1.2
   less-loader: 10.2.0_less@4.1.2
@@ -3274,6 +3274,10 @@ packages:
       - supports-color
     dev: false
 
+  /babel-plugin-transform-inline-environment-variables/0.4.3:
+    resolution: {integrity: sha1-o7CYgzU76LXiM24/8e+KXZP5xIk=}
+    dev: true
+
   /bail/1.0.5:
     resolution: {integrity: sha512-xFbRxM1tahm08yHBP16MMjVUAvDaBMD38zsM9EMAUN61omwLmKlOpB/Zku5QkjZ8TZ4vn53pj+t518cH0S03RQ==}
     dev: false
@@ -4278,11 +4282,6 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       is-obj: 2.0.0
-    dev: false
-
-  /dotenv/16.0.0:
-    resolution: {integrity: sha512-qD9WU0MPM4SWLPJy/r2Be+2WgQj8plChsyrCNQzW/0WjvcJQiKQJ9mH3ZgB3fxbUUxgc/11ZJ0Fi5KiimWGz2Q==}
-    engines: {node: '>=12'}
     dev: false
 
   /duplexer/0.1.2:
