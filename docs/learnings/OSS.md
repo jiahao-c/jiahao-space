@@ -35,6 +35,133 @@ Guess what? It worked! After verifying this fix with the test suits, I created a
 ![](https://i.imgur.com/LOUndqa.png)
 
 
+### Tooltip Arrow Wrong Border 
+I came across this issue on Github.
+
+![](https://i.imgur.com/3RfMGyY.png)
+
+When we zoom in, we can notice the the border of the arrow is not where it should be.
+
+<div>
+<img src="https://i.imgur.com/Jxqnei2.png" width=200>
+<img src="https://i.imgur.com/6eKtshd.png" width=200>
+</div>
+
+
+Although this is only a minor styling issue, it would still be nice to get it fixed. 
+
+The first thing I noticed: The Tooltip component is implemented using the Trigger component. Therefore, I kept in mind that I might need to look at both components to rule out the root of the problem.
+
+![](https://i.imgur.com/vg45PtT.png)
+
+Since it's a styling issue, DevTools can come in candy. I first identified the exact div for the arrow in the DOM. 
+![](https://i.imgur.com/AR1AFle.png)
+
+We can see that, when the arrow position (passed in prop) is `top`, the applied style of the arrow div is 
+```less
+border: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3')
+border-top: none;
+border-left: none;
+```
+
+
+
+But the expected style should actually be
+
+```less
+border: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3')
+border-bottom: none;
+border-right: none;
+```
+Or, more precisely,
+
+```less
+border-top: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3')
+border-left: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3')
+border-bottom: none;
+border-right: none;
+```
+
+![](https://i.imgur.com/RMsVrqP.png)
+
+So how did this happen? By looking at the styling of `Tooltip`, we can see that the first and the second block of rules in the screenshot came from `ToolTip` and `Trigger` accordingly:
+
+`components/Tooltip/style/index.less`
+![](https://i.imgur.com/3kdKgzz.png)
+
+`components/Trigger/style/index.less`
+![](https://i.imgur.com/52WOcnd.png)
+
+Now, the root cause is quite clear:
+
+The rule on line 38~39 in `Trigger` should apply, but it was not, due to the lower specificity than the rules in `Tooltip`. But the `Tooltip` did not handle different arrow positions like Trigger did, resulting in the styling issue we observed.
+
+Now to fix this problem, I should update the code to handle `border` in different `position`. I'm new to less, so I monitored the `arco.css` in the built file to help me understand the less files.
+
+![](https://i.imgur.com/y1vazIC.png)
+
+By observing how `Tooltip` uses the property `trigger-placement` in `css` and its complied `css`, I had two ideas: 
+
+1. Add the position prop and value to `arco-tooltip-arrow` (Line 11), just like trigger-placement (Line 3).
+
+```html=
+<span
+  class="arco-trigger arco-tooltip arco-trigger-position-bottom zoomInFadeOut-appear-done zoomInFadeOut-enter-done"
+  trigger-placement="bottom"
+>
+  <div class="arco-tooltip-content arco-tooltip-content-bottom" role="tooltip">
+    <div class="arco-tooltip-content-inner">Mouse over to display tooltip</div>
+  </div>
+  <div class="arco-trigger-arrow-container arco-tooltip-arrow-container">
+    <div
+      class="arco-trigger-arrow arco-tooltip-arrow"
+      position="bottom"
+    ></div>
+  </div>
+</span>;
+
+```
+
+2. Reuse the information from `trigger-placement`. 
+
+I went ahead with Option 2, and produced this style rule:
+
+```less
+.@{prefix}-trigger {
+
+  &[trigger-placement='top'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='tl'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='tr'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow {
+    border-bottom: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+    border-right: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+  }
+
+  &[trigger-placement='bottom'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='bl'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='br'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow {
+    border-top: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+    border-left: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+  }
+
+  &[trigger-placement='left'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='lt'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='lb'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow {
+    border-top: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+    border-right: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+  }
+
+  &[trigger-placement='right'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='rt'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow,
+  &[trigger-placement='rb'] .@{prefix}-trigger-arrow.@{prefix}-tooltip-arrow {
+    border-left: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+    border-bottom: @border-1 solid var(~'@{arco-cssvars-prefix}-color-neutral-3');
+  }
+}
+```
+
+This fixed the problem.
+![](https://i.imgur.com/8cduyJI.png)
+
 
 
 ### Type Error
