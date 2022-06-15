@@ -19,7 +19,7 @@ interface IProject {
 export default async (request: VercelRequest, response: VercelResponse) => {
   let { data, error } = await supabase
     .from<IProject>("project")
-    .select("*");
+    .select();
   if (error) {
     console.error("error", error);
     response.status(500).send("something happened");

@@ -32,6 +32,7 @@ I started to re-read the code, hoping to get my epiphany. After half an hour of 
 With a bit of uncertainty and hesitancy, I added another condition `|| targetValue=='.'` . Then I build the source code and launched storybook to try it out. 
 
 Guess what? It worked! After verifying this fix with the test suits, I created a PR to arco.
+
 ![](https://i.imgur.com/LOUndqa.png)
 
 
