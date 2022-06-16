@@ -43,11 +43,10 @@ I came across this issue on Github.
 
 When we zoom in, we can notice the the border of the arrow is not where it should be.
 
-<div>
-<img src="https://i.imgur.com/Jxqnei2.png" width=200>
-<img src="https://i.imgur.com/6eKtshd.png" width=200>
+<div align="center" style={{display: 'flex'}}>
+<img src="https://i.imgur.com/Jxqnei2.png" width="200"/>
+<img src="https://i.imgur.com/6eKtshd.png" width="200"/>
 </div>
-
 
 Although this is only a minor styling issue, it would still be nice to get it fixed. 
 
