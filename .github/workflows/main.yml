@@ -1,7 +1,7 @@
 name: keep-supabase-alive
 on:
   schedule:
-    - cron: '1 1 * * 1'
+    - cron: '0 10 8 ? * MON,WED,SUN *'
 jobs:
   cron:
     runs-on: ubuntu-latest
