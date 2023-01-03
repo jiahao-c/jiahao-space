@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -6,20 +5,10 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-interface IProject {
-  id: number;
-  name: string;
-  tags: string[];
-  text: string;
-  imgSrc: string;
-  demoLink?: string;
-  repoLink?: string;
-}
-
-export default async (request: VercelRequest, response: VercelResponse) => {
+export default async (request, response) => {
   let { data, error } = await supabase
-    .from<IProject>("project")
-    .select();
+    .from("project")
+    .select("*");
   if (error) {
     console.error("error", error);
     response.status(500).send("something happened");
