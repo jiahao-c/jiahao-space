@@ -15,25 +15,25 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@ant-design/icons": "^4.7.0",
-    "@docusaurus/core": "2.0.0-beta.18",
-    "@docusaurus/preset-classic": "2.0.0-beta.18",
+    "@ant-design/icons": "^4.8.0",
+    "@docusaurus/core": "2.2.0",
+    "@docusaurus/preset-classic": "2.2.0",
     "@mdx-js/react": "^1.6.22",
-    "@supabase/supabase-js": "^1.35.3",
-    "@vercel/node": "^1.15.2",
+    "@supabase/supabase-js": "^2.2.3",
+    "@vercel/node": "^2.8.2",
     "antd": "^4.19.5",
-    "masonic": "^3.6.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "masonic": "^3.7.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.0.0-beta.18",
+    "@docusaurus/module-type-aliases": "2.2.0",
     "@tsconfig/docusaurus": "^1.0.6",
-    "babel-plugin-transform-inline-environment-variables": "^0.4.3",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "docusaurus-plugin-less": "^2.0.2",
     "less": "^4.1.2",
     "less-loader": "^10.2.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.9.4"
   },
   "browserslist": {
     "production": [

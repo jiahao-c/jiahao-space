@@ -59,6 +59,11 @@ const config = {
             label: "GitHub",
             position: "right",
           },
+          {
+            href: "https://jiahao.vercel.app/fly",
+            label: "Travel",
+            position: "right",
+          },
         ],
       },
       footer: {
