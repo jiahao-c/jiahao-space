@@ -1,6 +1,7 @@
-import useBaseUrl from '@docusaurus/useBaseUrl';
 import React from 'react';
-import styles from './HomepageFeatures.module.css';
+import styles from './styles.module.css';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
 
 type FeatureItem = {
   title: string;
@@ -39,6 +40,7 @@ const FeatureList: FeatureItem[] = [
     ),
   },
 ];
+
 
 function Feature({title, image, description}: FeatureItem) {
   return (

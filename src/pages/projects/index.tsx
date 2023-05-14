@@ -1,10 +1,14 @@
+import '@arco-design/web-react/dist/css/arco.css';
+
 import Layout from "@theme/Layout";
-import React, { useEffect, useState } from "react";
-import { Spin } from "antd";
-import "./projects.less";
-import ProjectCard from "@site/src/components/ProjectCard";
+import React from "react";
+import { Spin } from "@arco-design/web-react";
+import ProjectCard, { IProject } from "../../components/ProjectCard";
 import { Masonry } from "masonic";
-import { supabase } from "@site/src/supabaseClient";
+import useSWR from 'swr'
+
+const fetcher = (input: RequestInfo, init?: RequestInit) => 
+  fetch(input, init).then(res => res.json());
 
 function ProjectsHeader() {
   return (
@@ -20,53 +24,34 @@ function ProjectsHeader() {
   );
 }
 
-interface IProject {
-  id: number;
-  name: string;
-  tags: string[];
-  text: string;
-  imgSrc: string;
-  demoLink?: string;
-  repoLink?: string;
+function ProjectsMain() {
+    const { data,  error, isLoading } = useSWR('/api/get_projects', fetcher)
+    if (error) return <div>failed to load</div>
+    if (isLoading) return <Spin size={40}/>
+    const projects : IProject[] = data.projects;
+    return (
+        <Masonry
+        // Provides the data for our grid items
+        items={projects}
+        // Adds 8px of space between the grid cells
+        columnGutter={30}
+        // Sets the minimum column width to 172px
+        columnWidth={230}
+        // This is the grid item component
+        render={ProjectCard}
+        />
+    )
 }
 
-export default function Home(): JSX.Element {
-  const [projects, setProjects] = useState<IProject[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchProjects = async () => {
-    let { data: projectData, error } = await supabase
-      .from("project")
-      .select("*");
-    if (error) console.log("error", error);
-    else {
-      setProjects(projectData);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects().catch(console.error);
-  }, []);
-
+export default function Home() {  
   return (
     <Layout title="Projects" description="My side projects">
       <ProjectsHeader />
-      <main className="antd-container">
-        {loading ? (
-          <Spin size="large" />
-        ) : (
-          <Masonry
-            // Provides the data for our grid items
-            items={projects}
-            // Adds 8px of space between the grid cells
-            columnGutter={30}
-            // Sets the minimum column width to 172px
-            columnWidth={230}
-            // This is the grid item component
-            render={ProjectCard}
-          />
-        )}
+      <main
+      style={{padding: "3rem 3rem"}}
+      >
+        <ProjectsMain />
       </main>
     </Layout>
   );

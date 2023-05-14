@@ -1,40 +1,43 @@
 import React from "react";
-import { Card, Space, Tag } from "antd";
-import "./ProjectCard.css"
-import { GithubOutlined, EyeOutlined } from "@ant-design/icons";
-import { IProject } from "@site/static/data/projects";
+import { Card, Space, Tag } from '@arco-design/web-react';
+import { IconGithub, IconEye } from '@arco-design/web-react/icon';
 
+export interface IProject {
+    id: string;
+    name: string;
+    tags: string[];
+    text: string;
+    imgSrc: string;
+    demoLink?: string;
+    repoLink?: string;
+}
+  
 export default ({data:{ name, tags, text, imgSrc, demoLink, repoLink }} :{data:IProject}) => {
-  return (
-    <Card
-      bodyStyle={{ padding: "0" }}
-      hoverable={true}
-      // style={{ width: 300}}
-      cover={<img alt="example" src={imgSrc}
-      />}
-      actions={[
-        <a href={demoLink} target="_blank">
-          <EyeOutlined />
-        </a>,
-        <a href={repoLink} target="_blank">
-          <GithubOutlined />
-        </a>
-      ]}
-    >
-      <div className="cardBody">
-      <h3>{name}</h3>
-      <Space wrap
+    return (
+      <Card
+        hoverable={true}
+        cover={<img alt="example" src={imgSrc} />}
+        actions={[
+          <a href={demoLink} target="_blank">
+            <IconEye />
+          </a>,
+          <a href={repoLink} target="_blank">
+            <IconGithub />
+          </a>
+        ]}
+        style={{textAlign: "center"}}
       >
-      {tags.map(tagName => (
-        <Tag color="#38B2AC"
-        style={{
-          color: "white",
-        }}
-        >{tagName}</Tag>
-      ))}
-      </Space>
-      <p>{text}</p>
-      </div>
-    </Card>
-  );
+        <h3>{name}</h3>
+        <Space wrap>
+        {tags.map(tagName => (
+          <Tag color="#38B2AC"
+          style={{
+            color: "white",
+          }}
+          >{tagName}</Tag>
+        ))}
+        </Space>
+        <p>{text}</p>
+      </Card>
+    );
 };
