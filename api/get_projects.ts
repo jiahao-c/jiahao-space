@@ -5,6 +5,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
   const client = await db.connect();
   if (request.method == "GET") {
     const projects = (await client.sql`SELECT * FROM project;`).rows;
+    response.setHeader('Cache-Control', 'max-age=0, s-maxage=86400');
     return response.status(200).json({ projects });
   }
   return response.status(400).json({ error: "Bad request" });
