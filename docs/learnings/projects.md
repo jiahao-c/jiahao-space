@@ -3,7 +3,7 @@ sidebar_position: 1
 ---
 
 # In side projects
-My learnings and takeaways on some interesting stuff I worked on during internships.
+My learnings and takeaways on some interesting stuff I worked on.
 
 ## Easy Syntax Tree
 ### Event Delegation
@@ -61,7 +61,7 @@ Using linear regression, I was able to find a best-fit line: treeCanvasHeight=45
 ### SVG width
 So I need to get the width of an SVG Text Element by its id. My first attempt was:
     
-```typescript=
+```typescript
 export function calcHalfTextWidth(id: number): number {
   let textElement: SVGGraphicsElement = document.getElementById(id.toString());
   return textElement.getBBox().width / 2;
@@ -70,7 +70,7 @@ export function calcHalfTextWidth(id: number): number {
     
 But there’s a type error: TypeScript thinks the return type of getElementById() has to be HTMLElement, which is not the SVGGraphicsElement I declared for this variable. I did some research and found there is no elegant solution to this. The simplest (yet a bit dirty) fix is to convert it to any type:
 
-```typescript=
+```typescript
 export function calcHalfTextWidth(id: number): number {
   let textElement: SVGGraphicsElement = document.getElementById(id.toString()) as any;
   return textElement.getBBox().width / 2;
@@ -79,7 +79,7 @@ export function calcHalfTextWidth(id: number): number {
     
 Seems good if we were just doing vanilla JS. But in React, there is another problem, because this is how I am going to use this function:
 
-```typescript=
+```typescript
 <Polygon
 sides={3}
 size={20}
@@ -94,13 +94,13 @@ points={`
 />
 ```
     
-As you can see, I am using the function inside a prop for SVG Polygon element. The problem is: the <Text/> element inside the SVG won’t be rendered in HTML at the time when this function is invoked. The following error will be produced:
+As you can see, I am using the function inside a prop for SVG Polygon element. The problem is: the `<Text/>` element inside the SVG won’t be rendered in HTML at the time when this function is invoked. The following error will be produced:
     
 ![](https://i.imgur.com/0lPjVsQ.png)
 
-Will useRef() work? No, because that means to create a ref for every single SVG <text/>, which is unrealistic.
+Will useRef() work? No, because that means to create a ref for every single SVG `<text/>`, which is unrealistic.
 So, the question is:
-```typescript=
+```typescript
 function ParentComponent(){
   let largeArray = ['1','2','3','4','5']; //could be much larger 
   return(
@@ -146,7 +146,7 @@ function ParentComponent(){
 //So, how can we solve this?
 ```
     
-As explained in the comment, to calculate the props for <Child1/>, we need <Child2/> to be rendered to DOM, which defeats the purpose of React Virtual DOM.
+As explained in the comment, to calculate the props for `<Child1/>`, we need `<Child2/>` to be rendered to DOM, which defeats the purpose of React Virtual DOM.
     
 I considered other methods like estimating the text length solely based on string length and font size. But that may not be accurate enough.
     

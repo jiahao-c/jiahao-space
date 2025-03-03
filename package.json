@@ -1,6 +1,6 @@
 {
   "name": "jiahao-space",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
@@ -15,24 +15,24 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@arco-design/web-react": "^2.48.0",
-    "@docusaurus/core": "2.4.0",
-    "@docusaurus/preset-classic": "2.4.0",
-    "@mdx-js/react": "^1.6.22",
-    "@vercel/postgres": "^0.3.0",
-    "masonic": "^3.7.0",
-    "prism-react-renderer": "^1.3.5",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "swr": "^2.1.5"
+    "@arco-design/web-react": "^2.65.0",
+    "@docusaurus/core": "3.7.0",
+    "@docusaurus/preset-classic": "3.7.0",
+    "@mdx-js/react": "^3.1.0",
+    "@vercel/postgres": "^0.10.0",
+    "masonic": "^4.0.1",
+    "prism-react-renderer": "^2.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "swr": "^2.3.2"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.4.0",
-    "@docusaurus/types": "^2.4.0",
-    "@tsconfig/docusaurus": "^1.0.5",
-    "@types/node": "^20.1.4",
-    "@vercel/node": "^2.14.2",
-    "typescript": "^4.7.4"
+    "@docusaurus/module-type-aliases": "3.7.0",
+    "@docusaurus/types": "^3.7.0",
+    "@docusaurus/tsconfig": "^3.7.0",
+    "@types/node": "^22.13.8",
+    "@vercel/node": "^5.1.10",
+    "typescript": "^5.8.2"
   },
   "browserslist": {
     "production": [
@@ -45,6 +45,6 @@
     ]
   },
   "engines": {
-    "node": ">=16.14"
+    "node": ">=20.0"
   }
 }

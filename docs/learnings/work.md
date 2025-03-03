@@ -1,8 +1,8 @@
 ---
-sidebar_position: 5
+sidebar_position: 1
 ---
 
-# WIP: Stuff I learned at work
+# At work
 My learnings and reflections on some interesting stuff I worked on during internships.
 
 (To be written)

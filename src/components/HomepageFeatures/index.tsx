@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './styles.module.css';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
@@ -6,7 +5,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 type FeatureItem = {
   title: string;
   image: string;
-  description: JSX.Element;
+  description: React.ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [

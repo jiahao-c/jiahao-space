@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, Space, Tag } from '@arco-design/web-react';
 import { IconGithub, IconEye } from '@arco-design/web-react/icon';
 
