@@ -2,6 +2,8 @@
 sidebar_position: 8
 ---
 
+# Assets Caching in Jira P2 Plugin
+
 :::note
 
 This blog shares a problem I ran into regarding caching of remote assets in a jira p2 plugin

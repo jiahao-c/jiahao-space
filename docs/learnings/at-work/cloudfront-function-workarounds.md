@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# CloudFront Function
+# CloudFront Function Limitations
 I have used CloudFront functions extensively for a project. Below are some of my learnings.
 
 ## 301 Redirect

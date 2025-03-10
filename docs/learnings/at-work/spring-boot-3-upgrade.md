@@ -2,6 +2,8 @@
 sidebar_position: 9
 ---
 
+# Upgrading to Spring Boot 3
+
 :::note
 
 This blog shares a few solutions for problems that I ran into when upgrading a Kotlin service to Spring Boot 3 and Java 17.
