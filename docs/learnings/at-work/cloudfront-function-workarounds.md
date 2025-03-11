@@ -135,5 +135,35 @@ Object.entries(request.querystring).forEach(function(entry) {
 });
 ```
 
-Finally, this version works as expected.
+Finally, this version works as expected. 
+And there's actually one more caveat to note: `if` can check for empty string, but not empty object. So the check the check `if (request.querystring)` is meaningless because it is true even when querystring is `{}`. So `Object.keys(request.querystring).length > 0` is the proper way to check whether any query param exists. Therefore, the full, final CF function we use is:
+
+```javascript
+function handler(event) {
+    const request = event.request;
+    const host = request.headers.host.value;
+    const pathname = request.uri.replace('/t5/', '/forums/');
+    
+    let newURLString = `https://${host}${pathname}`;
+    
+    if (Object.keys(request.querystring).length > 0) {
+        const queryParams = [];
+        Object.entries(request.querystring).forEach(function(entry) {
+            const name = entry[0];
+            const valueObj = entry[1];
+            queryParams.push(`${encodeURIComponent(name)}=${encodeURIComponent(valueObj.value)}`);
+        });
+        newURLString += '?' + queryParams.join('&');
+    }
+
+    return {
+        statusCode: 301,
+        statusDescription: 'Moved Permanently',
+        headers: { "location": { "value": newURLString } }
+    };
+}
+```
+
+
+
 Take home message: When creating a CF function, keep in mind of CF’s unique event structure and very-restricted JS runtime.
