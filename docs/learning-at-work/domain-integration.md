@@ -1,8 +1,7 @@
 # Domain Integration
 
-## Problem To Solve
-
-The business wanted Community webiste to be consolidated under one domain to create a connected experience. But each site had its own domain, lives in different code repositories, and some of them are not even Atlassian-owned (i.e. 3rd party vendor sites).
+## The Challenge
+Atlassian aimed to consolidate its diverse community websites under a single domain, `community.atlassian.com`, to create a more cohesive user experience. However, the **disparate infrastructure** presents a major challenge: each site had its own domain, lives in different code repositories, and some of them are not even Atlassian-owned (i.e. 3rd party vendor sites).
 
 - forums(3p): `community.atlassian.com`  --> `community.atlassian.com/forums`
 
@@ -10,19 +9,19 @@ The business wanted Community webiste to be consolidated under one domain to cre
 
 - events(3p): `ace.atlassian.com` --> `community.atlassian.com/events`
 
-- homepage(1p): NEW --> `community.atlassian.com`&#x20;
+- homepage(1p): A new homepage would be created at `community.atlassian.com`
 
-To serve multiple apps under one domain, there are two common approaches: micros-frontend and reverse proxy. If all apps were Atlassian-owned, we could theoretically use a micro-frontend approach ([https://micro-frontends.org/](https://micro-frontends.org/)). But since there are 3p apps, we’d have to use a reverse proxy ([https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/](https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/) ) approach.
+## The Solution
 
-In our context, the reverse proxy is not a single service or resource. It’s a solution consisting of multiple pieces across Atlassian infra, first-party bifrost apps, third-party vendor apps. Working together, they serves functionalities such as&#x20;
+To serve multiple applications under one domain, two common approaches are micro-frontends and reverse proxies. While a [micro-frontend](https://micro-frontends.org/) approach could theoretically be used if all applications were Atlassian-owned, the presence of third-party applications necessitated a [reverse proxy](https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/) solution.
 
-- Domain Consolidation (serving multiple Atlassian and vendor websites under one domain)
 
-- Precise Access Control (IP-based / Path-based / Combined)&#x20;
+In this context, the reverse proxy isn't a single service. Instead, it's a comprehensive solution integrating various components across Atlassian's infrastructure, first-party applications, and third-party vendor applications. This collaborative approach enables the following key functionalities:
 
-- Fast Redirections (CF-function takes less than 1 **millisecond** to execute)
-
-- Customizable Request Modification (HTTP URI / header / params)&#x20;
+* **Domain Consolidation:** Seamlessly serves multiple Atlassian and vendor websites under a single, unified domain.
+* **Precise Access Control:** Offers granular control over access based on IP addresses, URL paths, or a combination of both.
+* **Rapid Redirections:** Leverages Cloudflare Workers for extremely fast redirections, executing in less than one millisecond.
+* **Customizable Request Modification:** Allows for flexible modification of HTTP URIs, headers, and parameters.
 
 ### Behaviours & Routing
 
@@ -30,24 +29,12 @@ In our context, the reverse proxy is not a single service or resource. It’s a 
 
 ### Access Control (WIP)
 
-Envoy-level IP whitelist
+During internal testing, two methods of access control were used to meet various needs of access control requirements
 
-CF Function
+- AWS WAF (to allow certain internal/vendor IPs to visit the CloudFront Distribution)
+- CloudFront Function (for fine-grained access control based on request metadata) 
 
-WIP.
 
 ### Ways of redirections
 
 ![](/img/way-of-redirection.png)
-
-## Terminology
-
-Community Homepage: [https://community.atlassian.com/](https://community.atlassian.com/)
-
-- Events Splash Page [https://community.atlassian.com/events](https://community.atlassian.com/events)
-
-- Champions Splash Page  [https://community.atlassian.com/champions](https://community.atlassian.com/champions)
-
-- Forums  [https://community.atlassian.com/forums](https://community.atlassian.com/forums)
-
-- Learning [https://community.atlassian.com/learning](https://community.atlassian.com/learning)
