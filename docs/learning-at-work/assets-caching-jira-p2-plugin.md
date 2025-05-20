@@ -14,6 +14,8 @@ This blog shares a problem I ran into regarding caching of remote assets in a ji
 
 I was developing a [Jira web panel](https://developer.atlassian.com/server/jira/platform/web-panel/) where the content is a React app. 
 
+![](/img/kb-ai.png)
+
 Unlike Forge app (for Jira Cloud), P2 plugin (for Jira Server/DC) does not natively support React apps. So we had to load it from an external script. The react app is hosted in an internal frontend gateway (where CloudFront & S3 are used as the infra layer) and injected into the Jira web panel like this:
 
 ```html
@@ -22,8 +24,8 @@ Unlike Forge app (for Jira Cloud), P2 plugin (for Jira Server/DC) does not nativ
 
 The problem is, when the js gets updated, the browser does not know! 
 Usually, for websites, there’s a version hash appended to a file name or query param.
-![](/version-hash-param.png)
-![](/version-hash-filename.png)
+![](/img/version-hash-param.png)
+![](/img/version-hash-filename.png)
 
 But for our special use case of a Jira P2 plugin, having to re-compile & re-install the plugin every time the frontend is updated is not ideal. (You can't use any continuous-integration for this...Jira DC plugin installation is a manual process).
 

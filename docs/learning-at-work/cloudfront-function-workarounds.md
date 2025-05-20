@@ -22,7 +22,7 @@ https://community.atlassian.com/forums/how-to-earn-badges?utm_medium=email
 
 Looks as easy as a url.replace(), right? I wish so too. Unfortunately, the cloudfront request object isn’t quite like that.
 
-![](/cloudfront-object.png)
+![](/img/cloudfront-object.png)
 
 Here is an example Cloudfront event. As you can see, instead of have the entire URL as a single string, it breaks up it into 3 pieces. (Then further breaks the querystring into multiple pieces)
 
