@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Bug hunting
 
-bugs I found in recruiting system when applying to companies.
+Bugs I found in recruiting system when applying to companies.
 
 ## IBM
 ### Can't apply
@@ -52,10 +52,3 @@ In the end, the applicants is redirected to the login page of `http://2x-dc2.ken
 ### Summary
 
 This is most likely a backend issue of the IBM library Open Liberty. Since the bug of the library was attempted to be fixed back in 2019, the fact that this issue is recurring today on October 11/2020, might be caused by an incorrect deployment of the backend. Possible solution may be checking the library settings to make sure the cookie WASReqURL can be set correctly.
-
-## ByteDance
-### Status Inconsistancy
-Same application shows different status under `/campus` and `/experienced`. Should be a backend problem.
-
-![](https://i.imgur.com/ISbGRmE.png)
-![](https://i.imgur.com/NDI4TCD.png)

@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# In side projects
+# Learning in side projects
 My learnings and takeaways on some interesting stuff I worked on.
 
 ## Easy Syntax Tree

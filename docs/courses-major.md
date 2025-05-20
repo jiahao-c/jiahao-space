@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# At university
+# Coursework
 Sharing the topics and assignments of some interesting and useful courses I took at McGill university.
 
 ## Operating Systems
