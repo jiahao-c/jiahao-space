@@ -1,18 +1,14 @@
 # Domain Integration
 
-## Problem To Solve
+## Intro
 
-The business wanted Community webiste to be consolidated under one domain to create a connected experience. But each site had its own domain, lives in different code repositories, and some of them are not even Atlassian-owned (i.e. 3rd party vendor sites).
+Initially, each app (1p Atlassian-owned and 3p vendor-owned) had its own domain. For example, forums was at community.atlassian.com and learning was at [university.atlassian.com](http://university.atlassian.com).&#x20;
 
-- forums(3p): `community.atlassian.com`  --> `community.atlassian.com/forums`
+The business wanted the apps to be consolidated under one domain. This is the fundamental part of the connected experience for Community.&#x20;
 
-- learning(1p): `university.atlassian.com` --> `community.atlassian.com/learning`
+To implement multiple apps under one domain, there are two common approaches: micros-frontend and reverse proxy. If all apps were 1p, we could theoretically use a micro-frontend approach ([https://micro-frontends.org/](https://micro-frontends.org/)). But since there are 3p apps, we’d have to use a reverse proxy ([https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/](https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/) ) approach.
 
-- events(3p): `ace.atlassian.com` --> `community.atlassian.com/events`
 
-- homepage(1p): NEW --> `community.atlassian.com`&#x20;
-
-To serve multiple apps under one domain, there are two common approaches: micros-frontend and reverse proxy. If all apps were Atlassian-owned, we could theoretically use a micro-frontend approach ([https://micro-frontends.org/](https://micro-frontends.org/)). But since there are 3p apps, we’d have to use a reverse proxy ([https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/](https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/) ) approach.
 
 In our context, the reverse proxy is not a single service or resource. It’s a solution consisting of multiple pieces across Atlassian infra, first-party bifrost apps, third-party vendor apps. Working together, they serves functionalities such as&#x20;
 
@@ -39,6 +35,8 @@ WIP.
 ### Ways of redirections
 
 ![](/img/way-of-redirection.png)
+
+
 
 ## Terminology
 
