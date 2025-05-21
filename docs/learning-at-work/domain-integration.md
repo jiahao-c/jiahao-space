@@ -45,4 +45,8 @@ During internal testing, two methods of access control were used to meet various
 Instead of `--public-url /assets/`, we need to use Instead of `--public-url community.atlassian.com/assets/[subapp path]`
 
 ### Router
-The project uses `Router` from react-resource-router. So we need to add the prop `basePath` as in `<Router routes={...} history={...} basePath='[subapp path]'>
+The project uses `Router` from react-resource-router. So we need to add the prop `basePath` as in 
+
+```javascript
+<Router routes={...} history={...} basePath='[subapp path]'>
+```
