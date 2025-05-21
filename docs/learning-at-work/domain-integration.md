@@ -23,7 +23,13 @@ In this context, the reverse proxy isn't a single service. Instead, it's a compr
 * **Rapid Redirections:** Leverages Cloudflare Workers for extremely fast redirections, executing in less than one millisecond.
 * **Customizable Request Modification:** Allows for flexible modification of HTTP URIs, headers, and parameters.
 
+
 ### Behaviours & Routing
+A couple of CloudFront functionalities were used: 
+- Custom Origins
+    - Origin Request Policy
+- Bahaviours
+    - Cache Policy
 
 ![](/img/bahaviour.png)
 
