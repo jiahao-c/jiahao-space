@@ -6,7 +6,8 @@
 ## Technologies Used
 - SQS
 - Lambda (nodejs)
-    - [Lambda PowerTools](https://github.com/aws-powertools/powertools-lambda-typescript) for dependency injection
+    - [Lambda PowerTools](https://github.com/aws-powertools/powertools-lambda-typescript) for logging
+    - [middy](https://www.npmjs.com/package/@middy/core) for dependency injection
 - Lambda@Edge (nodejs)
 - CloudFront (for edge functions at viewer response)
 - IAM Roles (for cross-account resource access)
