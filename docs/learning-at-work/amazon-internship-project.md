@@ -1,4 +1,4 @@
-## Amazon Internship Project
+# Amazon Internship Project
 ![](/img/design.png)
 ![](/img/search.png)
 ![](/img/result.png)
