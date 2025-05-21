@@ -6,7 +6,7 @@ sidebar_position: 8
 
 :::note
 
-This blog shares a problem I ran into regarding caching of remote assets in a jira p2 plugin
+This blog shares a problem I ran into regarding caching of remote assets in a jira p2 plugin. 
 
 :::
 
@@ -15,6 +15,12 @@ This blog shares a problem I ran into regarding caching of remote assets in a ji
 I was developing a [Jira web panel](https://developer.atlassian.com/server/jira/platform/web-panel/) where the content is a React app. 
 
 ![](/img/kb-ai.png)
+
+Requirement: When a user visits a Jira ticket, the browser should always load the latest deployed AI Assist panel version.
+
+Problem: The browser often loads an older version.
+
+## Deep dive for the special use case
 
 Unlike Forge app (for Jira Cloud), P2 plugin (for Jira Server/DC) does not natively support React apps. So we had to load it from an external script. The react app is hosted in an internal frontend gateway (where CloudFront & S3 are used as the infra layer) and injected into the Jira web panel like this:
 
