@@ -27,7 +27,7 @@ In this context, the reverse proxy isn't a single service. Instead, it's a compr
 
 ![](/img/bahaviour.png)
 
-### Access Control (WIP)
+### Access Control
 
 During internal testing, two methods of access control were used to meet various needs of access control requirements
 
@@ -38,3 +38,11 @@ During internal testing, two methods of access control were used to meet various
 ### Ways of redirections
 
 ![](/img/way-of-redirection.png)
+
+## Caveats
+
+### Asset URL
+Instead of `--public-url /assets/`, we need to use Instead of `--public-url community.atlassian.com/assets/[subapp path]`
+
+### Router
+The project uses `Router` from react-resource-router. So we need to add the prop `basePath` as in `<Router routes={...} history={...} basePath='[subapp path]'>
