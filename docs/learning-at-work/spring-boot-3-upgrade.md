@@ -2,13 +2,28 @@
 sidebar_position: 9
 ---
 
-# Upgrading to Spring Boot 3
+# Service Modernization
 
 :::note
 
-This blog shares a few solutions for problems that I ran into when upgrading a Kotlin service to Spring Boot 3 and Java 17.
+This blog shares a few solutions for problems that I ran into when modernizing a backend service:
+- Spring Boot 2 --> Spring Boot 3
+- Java 11 --> Java 17
+- redisX 6 --> redisX 7
+- Spring Cloud AWS 2 --> Spring Cloud AWS 3
 
 :::
+
+## Using `SqsListener` from Spring Cloud AWS 3
+Previous annotation for listener method:
+```
+@SqsListener(value="..." deletionPolicy=SqsMessageDeletionPolicy.ON_SUCCESS)
+```
+New annotation for listener method:
+```
+@SqsListener(value="...")
+```
+Reason: `deletionPolicy` is no longer available in the annotation. It's now controlled by [Acknowledgement Mode](https://docs.awspring.io/spring-cloud-aws/docs/3.0.1/reference/html/index.html#acknowledgement-mode) and the default value is ON_SUCCESS, so we don't need to configure it.
 
 ## Jacoco not generating report?
 
@@ -63,3 +78,4 @@ spring:
 
 ## Maven Errors?
 Make sure you use at least maven 3.9.x and Kotlin 1.8.x
+
