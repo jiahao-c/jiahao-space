@@ -17,7 +17,7 @@ export default ({data:{ name, tags, text, imgSrc, demoLink, repoLink }} :{data:I
         hoverable={true}
         cover={<img alt="example" src={imgSrc} />}
         actions={[
-          <a href={demoLink} target="_blank">
+          demoLink && <a href={demoLink} target="_blank">
             <IconEye />
           </a>,
           <a href={repoLink} target="_blank">
