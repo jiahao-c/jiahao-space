@@ -19,3 +19,5 @@
 CloudFront KVS is limited to 5MB, not enough to store all the redirections.
 ### Why not use a Confluence Plugin?
 Performance decline for Confluence.
+### What is Micros?
+See [this article](https://www.atlassian.com/trust/reliability/cloud-architecture-and-operational-practices#cloud-infrastructure).
