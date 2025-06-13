@@ -31,6 +31,10 @@ const config = {
     locales: ['en'],
   },
 
+  plugins: [
+    ['vercel-analytics',],
+  ],
+
   presets: [
     [
       'classic',

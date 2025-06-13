@@ -15,21 +15,22 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@arco-design/web-react": "^2.65.0",
-    "@docusaurus/core": "3.7.0",
-    "@docusaurus/preset-classic": "3.7.0",
+    "@arco-design/web-react": "^2.66.1",
+    "@docusaurus/core": "3.8.1",
+    "@docusaurus/plugin-vercel-analytics": "^3.8.1",
+    "@docusaurus/preset-classic": "3.8.1",
     "@mdx-js/react": "^3.1.0",
     "@vercel/postgres": "^0.10.0",
-    "masonic": "^4.0.1",
+    "masonic": "^4.1.0",
     "prism-react-renderer": "^2.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "swr": "^2.3.2"
+    "swr": "^2.3.3"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.7.0",
-    "@docusaurus/types": "^3.7.0",
-    "@docusaurus/tsconfig": "^3.7.0",
+    "@docusaurus/module-type-aliases": "3.8.1",
+    "@docusaurus/tsconfig": "^3.8.1",
+    "@docusaurus/types": "^3.8.1",
     "@types/node": "^22.13.8",
     "@vercel/node": "^5.1.10",
     "typescript": "^5.8.2"

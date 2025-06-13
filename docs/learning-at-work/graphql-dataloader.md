@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# Optimizing GQL queries using dataloader 
+# Optimizing GQL queries using dataloader and apollo cache
 
 ![](/img/symphony.jpeg) 
 
@@ -12,7 +12,8 @@ Frontend: Apollo Client
 GraphQL IDE: [GraphiQL](https://team.atlassian.com/gateway/api/graphql)
 Backend: Netflix DGS (Domain Graph Service)
 
-We want to solve the n+1 problem for agent status fetching, to reduce the load for agent status service. We can do so by implementing a data loader:
+
+First, we want to solve the n+1 problem for agent status fetching, to reduce the load for agent status service. We can do so by implementing a data loader:
 
 
 ```java
@@ -30,4 +31,20 @@ public class AgentStatusDataLoader implements BatchLoader<User, AgentStatus> {
         )
     }
 }
+```
+
+Then, we want our frontend to be able to cache graphql queries. We can do so by turning using an InMemoryCache.
+
+```typescript
+import { InMemoryCache, ApolloClient } from '@apollo/client';
+
+const client = new ApolloClient({
+  cache: new InMemoryCache({
+    typePolicies: {
+        Agent: {
+             keyFields: ["email"], //unique identifier for an agent
+        }
+    }
+  })
+});
 ```
