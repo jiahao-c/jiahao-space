@@ -32,7 +32,7 @@ const config = {
   },
 
   plugins: [
-    ['vercel-analytics',],
+    ['vercel-analytics', {mode :'auto'}]
   ],
 
   presets: [
