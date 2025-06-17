@@ -1,4 +1,4 @@
-## Analytic event on panel expand
+# Analytic event on panel expand
 
 
 ```javascript
