@@ -35,7 +35,7 @@ public class AgentStatusDataLoader implements BatchLoader<User, AgentStatus> {
 
 Then, we want our frontend to be able to cache graphql queries. We can do so by turning using an InMemoryCache.
 
-```typescript
+```typescript showLineNumbers
 import { InMemoryCache, ApolloClient } from '@apollo/client';
 
 const client = new ApolloClient({

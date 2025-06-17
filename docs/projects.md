@@ -79,7 +79,7 @@ export function calcHalfTextWidth(id: number): number {
     
 Seems good if we were just doing vanilla JS. But in React, there is another problem, because this is how I am going to use this function:
 
-```typescript
+```jsx showLineNumbers
 <Polygon
 sides={3}
 size={20}
@@ -100,7 +100,7 @@ As you can see, I am using the function inside a prop for SVG Polygon element. T
 
 Will useRef() work? No, because that means to create a ref for every single SVG `<text/>`, which is unrealistic.
 So, the question is:
-```typescript
+```typescript showLineNumbers
 function ParentComponent(){
   let largeArray = ['1','2','3','4','5']; //could be much larger 
   return(
