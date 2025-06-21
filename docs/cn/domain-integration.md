@@ -228,8 +228,9 @@ function handler(event) {
 Sitemap 是 SEO 中重要的一环。由于内部前端基建的限制，主网站的 sitemap 只能放在 /assets/sitemap.xml。因此，我们首先需要在主网站的 robots.txt 里写这样一行，让爬虫能找到 sitemap：
 ```
 Sitemap: /assets/sitemap.xml
+
 ```
-然后，在主网站的sitemap里，用 <loc> 标签告诉爬虫，每个子网站的 sitemap 所在位置
+然后，在主网站的sitemap里，用 `<loc>` 标签告诉爬虫，每个子网站的 sitemap 所在位置
 ```
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <sitemap>
