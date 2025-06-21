@@ -25,31 +25,33 @@ API：RESTful
 - 项目时间很紧，从 PRD 到第一版上线只有 2 个月时间
     - 小组内 4 个工程师需要从零完成前端、后端、Jira 插件等一系列开发任务
     - 作为一个fullstack组，组内技能不均衡，3个工程师都偏后端，只有我偏前端
-- 项目启动前，设计师突然离职了，留下的 Figma 里只有一张供参考的设计图，距离完整的设计文件有很多欠缺。
-- 初版上线后，法务团队突然提出合规问题，需要紧急修复
 - Jira 和 内部前端基建有诸多限制，这个项目是公司内第一个在 Jira DC 的 SDK 里嵌入 React 的项目，没有先例方案可以参考。
+- 项目启动前，设计师突然离职了，留下的 Figma 里只有一张供参考的设计图，距离完整的设计文件有很多欠缺。
+- 初版上线后，法务部门突然提出合规问题，需要紧急修复
 
-
-## 我的贡献：
-- 我主动制作了交互流程文档，和产品经理对齐、明确需求，处理加载屏、报错屏等各类情况。
-- 作为前端 feature lead，我设计前端实现方案、通过实验来验证可行性。拆解任务、理清任务依赖，分配给小组里其他工程师
-- 与产品经理和法务团队沟通并理解 HIPPA 合规需求，并短时间内开发解决方案
+## 我的贡献
+- 我主动制作了交互流程文档，和产品经理对齐、明确需求，以及加载屏、报错屏等各类情况的预期表现。
+- 作为前端 feature lead，我设计前端实现方案、通过实验来验证可行性。拆解任务、理清任务依赖、稳步推进项目开发。
+- 与产品经理和法务部门沟通并理解 HIPPA 合规需求，并短时间内开发解决方案
 
 ## 项目过程中我解决的技术问题 
 ### 资源缓存问题
 背景：
 
-内部基建要求所有的前端应用都使用 internal frontend gateway (基于 CloudFront, S3, Route 53)。正常情况下，每次部署新的静态资源，都会生成新的hash，例如 `index.c2394f3e.js`。
-![](/img/version-hash-param.png)
-![](/img/version-hash-filename.png)
 
-DC 的 SDK 默认不支持 React，只支持 Apache Velocity（只有 Jira Cloud 的 SDK 对 React 支持较好），需要通过一些 workaround 来实现在 Jira web panel 中内嵌 React。
-但由于 Jira DC SDK 对于 web panel 诸多限制，我们只能将 script tag 硬编码在插件的 Apache Velocity 模版中。当页面被加载时， script 再将 react 应用加载并渲染到页面的指定 div 中。
-可是，由于Jira 插件只能手动部署，无法通过 CI/CD 自动部署， 如果每次部署前端时都更新一遍插件里的文件名，则会太低效。因此只能用不带hash的文件名：
+首先，Jira DC SDK 默认不支持 React，只支持 Apache Velocity（只有 Jira Cloud 的 SDK 对 React 支持较好）。 因此我需要通过一些 workaround 来实现在 Jira web panel 中内嵌 React，也就是将 script tag 硬编码在插件的 Apache Velocity 模版中。当 jira 页面加载出 panel 后，浏览器再去加载和执行这一行 script，最终将 react 应用渲染到页面的指定 div 中。
+
 
 ```html
 <div id="kms-panel"></div> <script type="module" src="https://[internal-domain]/assets/panel-react/index.js"></script>
 ```
+
+
+内部基建要求所有的前端应用都使用 internal frontend gateway (基于 CloudFront, S3, Route 53)。正常情况下，每次部署新的静态资源，都会生成新的hash，例如 `index.c2394f3e.js`。
+![](/img/version-hash-param.png)
+![](/img/version-hash-filename.png)
+
+可是，由于Jira 插件只能手动部署，无法通过 CI/CD 自动部署， 如果每次部署前端时都更新一遍插件里的文件名，则会太低效。因此只能用上面这样不带hash的文件名。
 
 问题：
 
@@ -158,7 +160,7 @@ const useTicketMetadata = (): Partial<TicketMetadata> => {
 ```
 
 
-## 业务方和同事对我的反馈：
+## 业务方和同事对我的反馈
 
 Rachel Sterns, TPM
 > In January, the AI Agent team lost their designer. Jiahao stepped up to take ownership of much of this work. He was thoughtful with visuals, seeking clarity, and validating assumptions. He was open to feedback, responsive to needs, and also still delivered on technical activities required. I believe we have made as much rapid progress as we have with this tool because Jiahao has performed so strongly as a leader.
