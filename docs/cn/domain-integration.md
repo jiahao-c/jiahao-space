@@ -1,4 +1,4 @@
-# Domain Integration
+# 反向代理
 
 ## 项目背景
 业务方认为论坛、课堂、活动、社区主页存在于分散的域名中，影响用户体验，因此希望将其全部整合到一个域名下。
@@ -222,3 +222,29 @@ function handler(event) {
 
 ### assets URL
 既然域名换了，parcel编译时的静态资源域名也需要换，得从原本的 `--public-url /assets/` 变成 `--public-url community.atlassian.com/assets/[subapp path]`。
+
+
+### Sitemap
+Sitemap 是 SEO 中重要的一环。由于内部前端基建的限制，主网站的 sitemap 只能放在 /assets/sitemap.xml。因此，我们首先需要在主网站的 robots.txt 里写这样一行，让爬虫能找到 sitemap：
+```
+Sitemap: /assets/sitemap.xml
+```
+然后，在主网站的sitemap里，用 <loc> 标签告诉爬虫，每个子网站的 sitemap 所在位置
+```
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <sitemap>
+        <loc>https://community.atlassian.com/</loc>
+    </sitemap>
+    <sitemap>
+        <loc>
+            https://community.atlassian.com/learning/sitemap.xml
+        </loc>
+    </sitemap>
+    <sitemap>
+        <loc>
+            https://community.atlassian.com/forums/s/sitemap_threads.xml.gz
+        </loc>
+    </sitemap>
+    ...
+</sitemapindex>
+```
