@@ -1,24 +1,24 @@
 # AI 知识库面板
 
 ## 项目背景
-在客服工单系统 (Atlassian 内部一个特殊的 Jira DC 实例) 中，客服人员(Support Agent)希望可以利用 AI 快速找到所需的知识库文章(KB, Knowledge Base)，以增加工单解决效率。
+在客服工单系统（Atlassian 内部的一个特殊 Jira DC 实例）中，客服人员（Support Agent）希望借助 AI 快速定位所需的知识库文章（KB, Knowledge Base），以提升工单处理效率。
 
 ![](/img/kb-ai.png)
 
 
 ## 功能要求
-- 当客服打开一个工单，可以直接看到 AI 预先生成的 KB 推荐
-- 客服可以对每个 KB 推荐的质量进行反馈
-- 客服可以在输入框中进行聚合搜索，查找所需的知识库文章
-- 客服可以勾选知识库文章，让 AI 生成参考回复
+- 客服打开工单时，可直接看到 AI 预先生成的 KB 推荐
+- 客服可对每条 KB 推荐的质量进行反馈
+- 客服可在输入框中聚合搜索，查找所需知识库文章
+- 客服可勾选知识库文章，由 AI 生成参考回复
 
 
 ## 项目架构
-后端上游（由 AI 部门提供）：用于 KB 推荐/搜索/生成 的 Restful API
+后端上游（由 AI 团队提供）：用于 KB 推荐、搜索、生成的 Restful API
 
-后端：Spring Boot，DynamoDB, SQS
+后端：Spring Boot, DynamoDB, SQS
 API：RESTful
-前端： React (通过 [web panel](https://developer.atlassian.com/server/jira/platform/web-panel/) 内嵌在Jira中 )
+前端：React（通过 [web panel](https://developer.atlassian.com/server/jira/platform/web-panel/) 内嵌在Jira中）
 
 
 ## 项目难点
@@ -30,9 +30,9 @@ API：RESTful
 - 初版上线后，法务部门突然提出合规问题，需要紧急修复
 
 ## 我的贡献
-- 我主动制作了交互流程文档，和产品经理对齐、明确需求，以及加载屏、报错屏等各类情况的预期表现。
-- 作为前端 feature lead，我设计前端实现方案、通过实验来验证可行性。拆解任务、理清任务依赖、稳步推进项目开发。
-- 与产品经理和法务部门沟通并理解 HIPPA 合规需求，并短时间内开发解决方案
+- 主动制作交互流程文档，与产品经理对齐需求，明确加载、报错等各类场景的预期表现
+- 作为前端 feature lead，设计前端实现方案，通过实验验证可行性，拆解任务、理清依赖，稳步推进开发
+- 与产品经理、法务沟通，理解 HIPPA 合规需求，并在短时间内开发解决方案
 
 ## 项目过程中我解决的技术问题 
 ### 资源缓存问题

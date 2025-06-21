@@ -20,7 +20,7 @@ In this context, the reverse proxy isn't a single service. Instead, it's a compr
 
 * **Domain Consolidation:** Seamlessly serves multiple Atlassian and vendor websites under a single, unified domain.
 * **Precise Access Control:** Offers granular control over access based on IP addresses, URL paths, or a combination of both.
-* **Rapid Redirections:** Leverages Cloudflare Workers for extremely fast redirections, executing in less than one millisecond.
+* **Rapid Redirections:** Leverages CloudFront Function for extremely fast redirections, executing in less than one millisecond.
 * **Customizable Request Modification:** Allows for flexible modification of HTTP URIs, headers, and parameters.
 
 

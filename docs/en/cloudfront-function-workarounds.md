@@ -2,31 +2,31 @@
 sidebar_position: 1
 ---
 
-# CloudFront Function Limitations
+# CloudFront Function 限制
 
-I have used CloudFront functions extensively for a project. Below are some of my learnings.
+我在一个项目中大量使用了 CloudFront functions。以下是我的一些经验总结。
 
-## 301 Redirect
+## 301 重定向
 
-I need to create a cloudfront function to redirect(HTTP 301) from a URL like
+我需要创建一个 cloudfront function，将如下 URL 进行 301 重定向：
 
 ```
 https://community.atlassian.com/t5/how-to-earn-badges?utm_medium=email
 ```
 
-to a URL like (note, the only change is /t5/ to /forums/)
+重定向到如下 URL（注意，唯一的变化是 /t5/ 变成了 /forums/）：
 
 ```
 https://community.atlassian.com/forums/how-to-earn-badges?utm_medium=email
 ```
 
-Looks as easy as a url.replace(), right? I wish so too. Unfortunately, the cloudfront request object isn’t quite like that.
+看起来像是一个简单的 url.replace()，对吧？我也希望如此。不幸的是，cloudfront 的 request 对象并不是这样。
 
 ![](/img/cloudfront-object.png)
 
-Here is an example Cloudfront event. As you can see, instead of have the entire URL as a single string, it breaks up it into 3 pieces. (Then further breaks the querystring into multiple pieces)
+下面是一个 Cloudfront event 的示例。可以看到，URL 并不是作为一个完整的字符串给出的，而是被拆分成了三部分。（而且 querystring 还会被进一步拆分成多个部分）
 
-When we want to perform a 301 redirect, we need to provide the new URL as a single string like this:
+当我们想要执行 301 重定向时，需要像这样提供新的 URL（作为一个完整的字符串）：
 
 ```javascript
 return {
@@ -36,25 +36,25 @@ return {
 };
 ```
 
-This means we have to “assemble” the new URL from the given cloudfront event object. Yes, including the query param part.
+这意味着我们必须从 cloudfront event 对象中“组装”出新的 URL。是的，包括 query param 部分。
 
 :::note
 
-rant: Come on, why would anyone on earth call something “querystring“ when it’s actually an object?
+吐槽：为什么有人会把一个对象叫做“querystring”？
 
 :::
 
-As this point, you might think:
+你可能会想：
 
-> That does not sound too bad. We could just use a library like npm: query-string, right?
+> 听起来也没那么糟。我们可以用 npm: query-string 这样的库，对吧？
 
-No. Two reasons:
+不行。有两个原因：
 
-(1) You can’t  “import/require” an external library in a CloudFront function. CF Function does not have any access to external modules. Theoretically, one could copy the code from a library as inline code in a CF function, but it is just unrealistic.  (Imagine copying all the code from a library and its dependencies into a single function, what a mess would that be. Not to mention that the function code has to be under 10KB.)
+(1) 你不能在 CloudFront function 里“import/require”任何外部库。CF Function 无法访问外部模块。理论上可以把库的代码复制进 CF function 作为内联代码，但这太不现实了。（想象一下把一个库和它的所有依赖都复制进一个函数里会有多乱，而且函数代码还必须小于 10KB。）
 
-(2) The querystring in a cloudfront event is not written as a standard URLSearchParams object. So the library wouldn’t be able to parse it anyways.
+(2) cloudfront event 里的 querystring 不是标准的 URLSearchParams 对象。所以库也无法解析。
 
-Therefore, I wrote my own converter code within the CF function:
+因此，我在 CF function 里自己写了转换代码：
 
 ```javascript
 function handler(event) {
@@ -77,13 +77,13 @@ function handler(event) {
 }
 ```
 
-When I tested it locally in node 20, it works great.  But when I run the above code in CloudFront, I got an error:
+我在本地 node 20 下测试没问题。但在 CloudFront 上运行时，报错：
 
 > Error: ReferenceError: "URL" is not defined
 
-Yep, [the URL interface that has existed since Node 6](https://developer.mozilla.org/en-US/docs/Web/API/URL) does not exist in latest CloudFront JS runtime.
+没错，[URL 接口自 Node 6 就有了](https://developer.mozilla.org/en-US/docs/Web/API/URL)，但在最新的 CloudFront JS 运行时里并不存在。
 
-Okay. Let’s ditch the nice, handy URL object and switch to string concatenation.
+好吧。放弃好用的 URL 对象，改用字符串拼接。
 
 ```javascript
 function handler(event) {
@@ -112,15 +112,15 @@ function handler(event) {
 }
 ```
 
-This should work, right?
+这应该可以了吧？
 
-No.  Now we get the error:
+不行。现在报错：
 
 > The CloudFront function associated with the CloudFront distribution is invalid or could not run. SyntaxError: Unexpected token "=>" in 10
 
-Surprise! [CF JS runtime 2.0](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/functions-javascript-runtime-20.html) only supports **some** ES6-12 features.
+惊喜！[CF JS runtime 2.0](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/functions-javascript-runtime-20.html) 只支持**部分** ES6-12 特性。
 
-Fine, let’s manually polyfill the arrow function.
+好吧，手动把箭头函数改成普通函数。
 
 ```javascript
 Object.entries(request.querystring).forEach(function([key, valueObj]) {
@@ -128,11 +128,11 @@ Object.entries(request.querystring).forEach(function([key, valueObj]) {
 });
 ```
 
-This should work, right? Unfortunately no.  Now I get the error
+这下总可以了吧？还是不行。又报错：
 
 > SyntaxError: Token `"["` not supported in this version
 
-Ok, so destructing is not supported either. Fine, let’s polyfill again.
+好吧，解构也不支持。再改。
 
 ```javascript
 Object.entries(request.querystring).forEach(function(entry) {
@@ -142,7 +142,7 @@ Object.entries(request.querystring).forEach(function(entry) {
 });
 ```
 
-Finally, this version works as expected. And there's actually one more caveat to note: `if` can check for empty string, but not empty object. So the check the check `if (request.querystring)` is meaningless because it is true even when querystring is `{}`. So `Object.keys(request.querystring).length > 0` is the proper way to check whether any query param exists. Therefore, the full, final CF function we use is:
+终于，这个版本可以正常工作了。还有一个小坑：`if` 可以判断空字符串，但不能判断空对象。所以 `if (request.querystring)` 其实没意义，因为即使 querystring 是 `{}` 也会为真。正确的做法是用 `Object.keys(request.querystring).length > 0` 判断是否有 query param。因此，最终完整的 CF function 如下：
 
 ```javascript
 function handler(event) {
@@ -170,10 +170,10 @@ function handler(event) {
 }
 ```
 
-Take home message: When creating a CF function, keep in mind of CF’s unique event structure and very-restricted JS runtime.
+结论：写 CF function 时，要注意 CF 独特的 event 结构和极其受限的 JS 运行时。
 
 
 
-## One Last Thing
+## 最后一点
 
-AWS has limited the number of new CloudFront function creations in a CloudFormation to 3. The Bifrost team was unaware of this limitation. (It is not mentioned anywhere in AWS documentation.) I worked with bifrost team to find out this during a mysterious deployment failure.
+AWS 限制了 CloudFormation 中新建 CloudFront function 的数量为 3 个。Bifrost 团队之前并不知道这个限制。（AWS 文档里也没写。）我和 bifrost 团队一起排查神秘的部署失败时才发现了这个问题。
