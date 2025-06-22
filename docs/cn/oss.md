@@ -223,7 +223,7 @@ border-right: none;
 
 除了功能本身的实现之外，我也补充了这个 API 的文档、测试的快照、以及更新了 storybook，最后也顺利 merge 啦～
 
-![](diff-2538.png)
+![](/img/diff-2538.png)
 
 ### TS 类型错误
 
