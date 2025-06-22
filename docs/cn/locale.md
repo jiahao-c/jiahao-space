@@ -17,7 +17,7 @@ Jira 的前端项目非常庞大，需要支持的 locale 和语言有很多，�
 
 首先，既然这个 bug 只在某个特定 modal 中发生，而不是在所有 modal 中都发生，可以排除是组件库本身的问题。
 
-通过 SourceGraph 搜索 （以及一番手动查找和确认），我们可以定位到这个 Modal 所在的文件。可以看到，这个 Modal 明明从 `useLocale()` hook 中获取了 locale，却忘记在 <DateTimeField> 里使用 locale 这个 prop：
+通过 SourceGraph 搜索 （以及一番手动查找和确认），我们可以定位到这个 Modal 所在的文件。可以看到，这个 Modal 明明从 `useLocale()` hook 中获取了 locale，却忘记在 `<DateTimeField>` 里使用 locale 这个 prop：
 
 ```jsx
 
