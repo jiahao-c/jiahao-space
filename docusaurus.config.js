@@ -96,6 +96,10 @@ const config = {
       prism: {
         theme: lightTheme,
       },
+      colorMode: {
+        defaultMode: 'light',
+        disableSwitch: true,
+    },
     }),
 };
 

@@ -253,7 +253,10 @@ Atlaskit 是 Atlassian Design System 的别称，是 Atlassian 出品的开源 R
 
 ![](/img/tooltip.png)
 
-经过研究，我发现，[Tooltip组件](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tooltip/src/tooltip.tsx) 是用 [react-popper](https://popper.js.org/react-popper/) 和 [React Portal](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/portal/src/internal/components/internal-portal.tsx) 来实现的, 所以对于 DOM 来说，它本身不算存在于 “侧边栏” 元素内。
+
+### 修复过程
+
+首先， atlaskit 中 [Tooltip 组件](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tooltip/src/tooltip.tsx) 是用 [react-popper](https://popper.js.org/react-popper/) 和 [React Portal](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/portal/src/internal/components/internal-portal.tsx) 来实现的, 所以对于 DOM 来说，它本身不算存在于 “侧边栏” 元素内。
 
 ```tsx
 shouldRenderTooltipPopup? (
@@ -267,7 +270,8 @@ shouldRenderTooltipPopup? (
 )
 ```
 
-### 修复过程
+在浏览器 devtool 的 layers 工具中，我们可以看到，tooltip 显示出来时， layer 数量会加一：
+![](/img/layer_console.png)
 
 组件库中有个 hook 叫 [useNotifyOpenLayerObserver](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/layering/src/components/open-layer-observer/use-notify-open-layer-observer.tsx)，它会在组件 mount/unmount 或变得 visible/hidden 时，增加/减少 open layer count，以 “通知” 上层的 `OpenLayerObserver`. 
 
