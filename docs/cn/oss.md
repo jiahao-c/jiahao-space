@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # 开源贡献
 
 ## arco-design
