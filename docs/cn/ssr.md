@@ -45,7 +45,7 @@ Parcel 是 Atlassian 内部要求使用的 bundler。在 parcelrc 里，我们�
 }
 ```
 
-### renderToPipeableStream 与 entry point
+### renderToPipeableStream
 
 除了 babel 外，我们也需要配置一个 template 文件，其本质上是一个 request handler。在这个文件中，我们需要用到最重要的 API 就是 `ReactDOM.renderToPipeableStream()`，它将给 SSR 的 JS runtime 提供一个 entry point。
 

@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 
 # GraphQL 性能优化
 
