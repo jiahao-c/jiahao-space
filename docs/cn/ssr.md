@@ -6,13 +6,14 @@
 
 通常提到 SSR，大家就会想到 Next.js，它可以跑在 Vercel 、AWS Amplify 等 infra-as-service 上，也可以直接跑在 nodejs 服务器或者 docker 容器里。
 
-但是，Atlassian 的 SSR infra 是内部[自研的，基于 jsdom 的一套方案](https://www.atlassian.com/blog/atlassian-engineering/cloud-overview#Server-side-rendering)，跑在 kubernetes上。这套内部前端基建并不支持 Next.js，也不支持 React Server Components。
+但是，Atlassian 的 SSR infra 是内部[自研的，基于 jsdom 的，跑在 kubernetes上的一套方案](https://www.atlassian.com/blog/atlassian-engineering/cloud-overview#Server-side-rendering)，甚至连 JS Runtime 也是基于 V8 自研的。 
 
-因此，这个 CSR--> SSR 改造主要是围绕着这套内部 SSR infra 进行的。
+这套内部前端基建并不支持 Next.js，也不支持 React Server Components。因此，这个 CSR--> SSR 改造主要是围绕着这套内部 SSR infra 进行的。
 
 ## 解决的问题和学到的东西
 
-### Babel 配置
+### Babel 和 Parcel 配置
+
 想要使用 Atlassian SSR infra，我们得在 babel 配置里对 browser 环境和 node 环境分开处理，因此我们的配置文件有两个部分：
 ```json
 {
@@ -33,8 +34,20 @@
 - 把 `process.env.xxx` 这种 inline env var 替换成实际的值
 - ...等等（由于保密需求，这里没法贴插件源码出来orz）
 
-### renderToPipeableStream
-除了 babel 外，我们也需要配置一个 template 文件，其本质上是一个 request handler。在这个文件中，我们需要用到最重要的 API 就是 `ReactDOM.renderToPipeableStream()`。
+Parcel 是 Atlassian 内部要求使用的 bundler。在 parcelrc 里，我们需要把所有的 js 文件都交给 SSR infra 组提供的 transformer:
+```json
+{
+    "transformers": {
+        "*.{js, mjs, jsx, ts, tsx}": [
+            "parcel-transformer-snapvm-globals"
+        ]
+    }
+}
+```
+
+### renderToPipeableStream 与 entry point
+
+除了 babel 外，我们也需要配置一个 template 文件，其本质上是一个 request handler。在这个文件中，我们需要用到最重要的 API 就是 `ReactDOM.renderToPipeableStream()`，它将给 SSR 的 JS runtime 提供一个 entry point。
 
 ```jsx
 
@@ -53,13 +66,14 @@ renderToPipeableStream(
             response.setHeader('content-type', 'text/html'); 
             pipe(response);
         }
-        //把各种变量提前写到window上
+        //把各种变量提前写到window上，babel 转译 SSR bundle 时会把 window 变成 globalThis 的
         window.isSSR = true;
         window.__FEATURE_GATES_VALIES__ = ${JSON.stringify(featureGatesBootstrapValues)};
         ...
     }
 )
 ```
+
 
 ### 浏览器端 API
 
