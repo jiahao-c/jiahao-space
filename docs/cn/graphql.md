@@ -62,3 +62,28 @@ const client = new ApolloClient({
   })
 });
 ```
+
+不过有个问题：这种缓存默认是在内存中的。这样的话，每次刷新页面，缓存都会丢失。
+
+所以我们还需要使用 `apollo3-cache-persist` 这个插件，将缓存 persist 到localStorage里：
+
+```typescript showLineNumbers
+import { InMemoryCache, ApolloClient } from '@apollo/client';
+
+const cache =  new InMemoryCache({
+    typePolicies: {
+        Agent: {
+             keyFields: ["email"],
+        }
+    }
+})
+// highlight-start
+await persistCache({
+  cache,
+  storage: new LocalStorageWrapper(window.localStorage),
+});
+// highlight-end
+const client = new ApolloClient({
+  cache: cache
+});
+```
