@@ -74,6 +74,24 @@ renderToPipeableStream(
 )
 ```
 
+### HydrateRoot
+
+上面的 `renderToPipeableStream` 给 server 提供了 entry point，我们自然也需要给浏览器提供 entry point，并对页面进行“注水”（即加上 js）。这一步需要我们在 index.tsx 里用到同样是 ReactDOM 里的 hydrateRoot:
+
+```jsx
+import { createRoot, hydrateRoot } from 'react-dom/client';
+
+if (isCSR) {
+    // CSR 情况。当SSR失败时，会fallback到 CSR
+    let root = createRoot(document.getElementById('root'));
+    root.render(RootJSX);
+} else {
+    // SSR 情况
+    hydrateRoot(document.getElementById('ssr-root'), RootJSX);
+}
+```
+
+
 
 ### 浏览器端 API
 
