@@ -132,3 +132,63 @@ import USER_QUERY, {type Userquery} from '../graphql/__generated__/Userquery.gra
 ### 路由
 
 内部前端基建的 [react-resource-router](https://github.com/atlassian-labs/react-resource-router) 支持 CSR 和 SSR，所以基本不用对路由做什么修改。
+
+### css 加载速度优化
+
+我们还可以通过 `rel="preload"` 的方式，让浏览器提前开始下载所需要的资源，进一步加快页面加载速度：
+```html
+<link rel="preload" as="style" href="https://.../assets/atlaskit-tokens_light.css">
+```
+
+### 脚本加载顺序
+在 Atlassian 社区新主页的上线过程中，我们需要满足 Compliance 要求，即如果用户选择不接受特定cookie，就不能运行 Google Tag Manager 中特定的跟踪脚本 (tags). 
+
+![](/img/onetrust-setting.png)
+
+为了达到这一效果，我们需要保证负责加载 Cookie Consent Banner 的脚本 (OneTrust)，先于 Google Tag Manager 脚本运行。
+
+![](/img/onetrust.jpeg)
+
+## 解决过程
+
+如果我们直接将两个脚本放在 HTML template （index.html） 里，像这样：
+
+```html
+<html>
+<head>
+<script src="https://atl-onetrust-wrapper.atlassian.com/assets/atl-onetrust-wrapper.min.js" type="text/javascript"></script>
+<script src="https://www.googletagmanager.com/gtm.js"></script>
+</head>
+<html>
+```
+
+虽然我们可以保证这两个 script 都在“注水”过程中被加载，（浏览器收到渲染好的 html 后，再加载）但这会造成一种 race condition，我们无法保证两个脚本加载的先后顺序。
+
+
+首先，我尝试使用 `defer` 和 `async` 这两个属性。给需要先运行的脚本加上 async （下载完成后立刻运行），给需要后运行的脚本加上 defer （在 DOM parse后运行）
+
+```html
+<html>
+<head>
+<script async src="https://atl-onetrust-wrapper.atlassian.com/assets/atl-onetrust-wrapper.min.js" type="text/javascript"></script>
+<script defer src="https://www.googletagmanager.com/gtm.js"></script>
+</head>
+<html>
+```
+
+经过测试，我们可以在浏览器 Performance tab 里看到 onetrust 脚本确实比 gtm 脚本先运行了。
+
+![](/img/performance-tab.png)
+
+但这其实是个巧合。async的原理（下载完成后立刻执行）是不能保证运行顺序的。因此，正确的做法是，两个 script 都用 defer：
+
+```html
+<html>
+<head>
+<script defer src="https://atl-onetrust-wrapper.atlassian.com/assets/atl-onetrust-wrapper.min.js" type="text/javascript"></script>
+<script defer src="https://www.googletagmanager.com/gtm.js"></script>
+</head>
+<html>
+```
+
+这样，我们可以保证在第一个 script 下载和执行后，第二个 script 才被执行。
