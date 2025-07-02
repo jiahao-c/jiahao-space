@@ -75,7 +75,7 @@ const config = {
           {
             href: "/projects",
             position: "left",
-            label: "Projects",
+            label: "Side Projects",
           },
           {
             href: "https://github.com/jiahao-c",
