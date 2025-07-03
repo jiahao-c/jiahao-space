@@ -262,7 +262,7 @@ Side Nav Flyout 的预期行为是：当用户鼠标悬浮在侧边栏的“展�
 但bug中实际发生的行为是：如果用户触发了侧边栏内某个tooltip，并将鼠标移到tooltip上，侧边栏就会收起来。
 
 
-### 修复过程
+#### 修复过程
 
 为什么会发生这个问题呢？我先阅读了 [SideNav 组件](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/navigation-system/src/ui/page-layout/side-nav/side-nav.tsx) 的源码。
 
