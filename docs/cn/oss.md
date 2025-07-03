@@ -269,17 +269,17 @@ Side Nav Flyout 的预期行为是：当用户鼠标悬浮在侧边栏的“展�
 首先，我想弄明白的问题是：什么情况下 SideNav 会关闭？在 SideNav 源码中我发现，“移出鼠标时关闭悬浮窗” 的逻辑是这样写的：
 
 ```jsx showLineNumbers
-	useEffect(() => {
-		// Close the flyout if there are no more layers open and the user is not mousing over the flyout areas
-		return openLayerObserver.onChange(
-			({ count }) => {
-				if (flyoutStateRef.current.type === 'ready-to-close' && count === 0) {
-					updateFlyoutState('force-close');
-				}
-			},
-			{ namespace: openLayerObserverSideNavNamespace },
-		);
-	}, [openLayerObserver, updateFlyoutState]);
+useEffect(() => {
+  // Close the flyout if there are no more layers open and the user is not mousing over the flyout areas
+  return openLayerObserver.onChange(
+    ({ count }) => {
+      if (flyoutStateRef.current.type === 'ready-to-close' && count === 0) {
+        updateFlyoutState('force-close');
+      }
+    },
+    { namespace: openLayerObserverSideNavNamespace },
+  );
+}, [openLayerObserver, updateFlyoutState]);
 ```
 
 可以看到，每次 `openLayerObserver` 这个 state 发生变化时，代码会检测 “open layer” 数量。当数量为 0，就关闭 flyout。那么啥是 layer 呢？在组件代码中，可以看到，openLayerObserver 是通过 [useOpenLayerObserver(](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/layering/src/components/open-layer-observer/use-open-layer-observer.tsx) 这个 hook 获取的。
