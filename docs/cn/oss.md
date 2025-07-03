@@ -251,18 +251,57 @@ border-right: none;
 
 Atlaskit 是 Atlassian Design System 的别称，是 Atlassian 出品的开源 React 组件库，我在 Atlassian 写的所有前端项目都会用到这个组件库。
 
-### Tooltip 导致悬浮侧边栏异常关闭
+### 悬浮侧边栏异常关闭
 
-有次在用 Tooltip 组件时，我发现了一个 bug: 当鼠标悬停在 [Side Nav Flyout](https://atlassian.design/components/navigation-system/layout/examples#side-nav-flyout) 里的 Tooltip 提示上时，这个 Side Nav Flyout 会意外关闭。
+有次在用 Tooltip 组件时，我发现了一个 bug: 当鼠标悬停在 [Side Nav](https://atlassian.design/components/navigation-system/layout/examples#side-nav-flyout) 组件里的 Tooltip 提示上时，这个 Side Nav Flyout 会意外关闭。
 
 ![](/img/tooltip.png)
+
+Side Nav Flyout 的预期行为是：当用户鼠标悬浮在侧边栏的“展开”时，无需点击，侧边栏就会自动“飞出来”，如果移开鼠标，侧边栏就会自动收起来。
+
+但bug中实际发生的行为是：如果用户触发了侧边栏内某个tooltip，并将鼠标移到tooltip上，侧边栏就会收起来。
 
 
 ### 修复过程
 
-首先， atlaskit 中 [Tooltip 组件](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tooltip/src/tooltip.tsx) 是用 [react-popper](https://popper.js.org/react-popper/) 和 [React Portal](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/portal/src/internal/components/internal-portal.tsx) 来实现的, 所以对于 DOM 来说，它本身不算存在于 “侧边栏” 元素内。
+为什么会发生这个问题呢？我先阅读了 [SideNav 组件](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/navigation-system/src/ui/page-layout/side-nav/side-nav.tsx) 的源码。
 
-```tsx
+首先，我想弄明白的问题是：什么情况下 SideNav 会关闭？在 SideNav 源码中我发现，“移出鼠标时关闭悬浮窗” 的逻辑是这样写的：
+
+```jsx showLineNumbers
+	useEffect(() => {
+		// Close the flyout if there are no more layers open and the user is not mousing over the flyout areas
+		return openLayerObserver.onChange(
+			({ count }) => {
+				if (flyoutStateRef.current.type === 'ready-to-close' && count === 0) {
+					updateFlyoutState('force-close');
+				}
+			},
+			{ namespace: openLayerObserverSideNavNamespace },
+		);
+	}, [openLayerObserver, updateFlyoutState]);
+```
+
+可以看到，每次 `openLayerObserver` 这个 state 发生变化时，代码会检测 “open layer” 数量。当数量为 0，就关闭 flyout。那么啥是 layer 呢？在组件代码中，可以看到，openLayerObserver 是通过 [useOpenLayerObserver(](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/layering/src/components/open-layer-observer/use-open-layer-observer.tsx) 这个 hook 获取的。
+
+```jsx
+const openLayerObserver = useOpenLayerObserver();
+```
+
+通过查文档，我发现，Atlaskit 组件库中的 Layering 是基于 React Context 所实现的 “层级” 概念，在 popup, dropdown 等需要 “覆盖在其他组件上面的” 组件中都会用到，方便每个组件获取正确的 `zIndex`。
+
+```jsx
+export function useOpenLayerObserver() {
+	const context = useContext(OpenLayerObserverContext);
+	...
+}
+```
+
+`OpenLayerObserver` 则是一个 context provider，用一个 ref 来跟踪它下面的 React DOM 里打开的 layered component 的数量。通过它，wrapper component 可以得出自身的 children 里是否有打开的 layering components。
+
+那么，看上去问题就出在 Layering 上。我又阅读了 [Tooltip 组件](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tooltip/src/tooltip.tsx) 的源码，发现它是用 [react-popper](https://popper.js.org/react-popper/) 和 [React Portal](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/portal/src/internal/components/internal-portal.tsx) 来实现的。
+
+```tsx showLineNumbers
 shouldRenderTooltipPopup? (
     <Portal zIndex={tooltipZIndex}>
         <Popper 
@@ -274,12 +313,12 @@ shouldRenderTooltipPopup? (
 )
 ```
 
-在浏览器 devtool 的 layers 工具中，我们可以看到，tooltip 显示出来时， layer 数量会加一：
-![](/img/layer_console.png)
+所以对于 DOM 来说，它本身不算存在于 “侧边栏” 元素的 children 内。因此，站在侧边栏的角度，它以为鼠标已经移出了 （`即 layerCount === 0`），于是就折叠了起来。
 
-组件库中有个 hook 叫 [useNotifyOpenLayerObserver](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/layering/src/components/open-layer-observer/use-notify-open-layer-observer.tsx)，它会在组件 mount/unmount 或变得 visible/hidden 时，增加/减少 open layer count，以 “通知” 上层的 `OpenLayerObserver`. 
+在浏览器 devtool 的 layers 工具中，我们可以看到，tooltip 显示出来时， 浏览器意义上的 layer 数量会加一：
+![](/img/layer_console.png)。
 
-而 `OpenLayerObserver` 则是一个 context provider，用一个 ref 来跟踪它下面的 React DOM 里打开的 layered component 的数量。通过它，wrapper component 可以得出自身的 children 里是否有打开的 layering components。
+可是 `OpenLayerObserverContext` 并不知道这件事，所以我们得 “通知” layer context。正巧，组件库中有个 hook 叫 [useNotifyOpenLayerObserver](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/layering/src/components/open-layer-observer/use-notify-open-layer-observer.tsx)，它会在组件 mount/unmount 或变得 visible/hidden 时，增加/减少 open layer count，以 “通知” 上层的 `OpenLayerObserver`. 
 
 所以，我们可以在 Tooltip 组件代码里加上对这个 hook 的调用，使得在 tooltip 显示出来的情况下，让它下面 flyout 的侧边栏也锁定在打开的状态。
 
@@ -289,6 +328,7 @@ const shouldRenderTooltipContainer: boolean = state !== 'hide' && Boolean(conten
 useNotifyOpenLayerObserver({isOpen: shouldRenderTooltipContainer})
 ```
 
+加上这一行后，经过测试，可以发现，bug 成功被解决啦！
 
 ## svg-cowbar
 
