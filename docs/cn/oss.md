@@ -249,7 +249,7 @@ border-right: none;
 
 ## Atlaskit
 
-Atlaskit 是 Atlassian Design System 的别称，是 Atlassian 出品的开源 React 组件库，我在 Atlassian 写的所有前端项目都会用到这个组件库。
+Atlaskit 是 [Atlassian Design System](https://atlassian.design/) 的别称，是 Atlassian 出品的开源 React 组件库，我在 Atlassian 写的所有前端项目都会用到这个组件库。
 
 ### 悬浮侧边栏异常关闭
 
