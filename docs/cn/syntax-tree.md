@@ -80,6 +80,44 @@ flatten 后的结构：
 
 ## 开发过程中学到的东西
 
+### 数据存储与 undo/redo
+
+先定义一个 TreeNode，然后整个树的数据以下面 `StateType` 的方式存储，其中包含两个数组： past 和 future，保留编辑历史。
+
+```typescript
+export interface TreeNode {
+  name: string;
+  children: TreeNode[];
+  id?: number;
+  triangleChild?: boolean;
+}
+
+export interface StateType {
+  tree: TreeNode;
+  operatingNode: HierarchyPointNode<TreeNode> | null;
+  inputAvailable: boolean;
+  past: TreeNode[];
+  future: TreeNode[];
+}
+```
+
+在 reducer 中，每次 UNDO，就从 past 数组中取出最后一个元素，作为新的 tree 渲染出来，并把当前的树放进 future 数组里。而每次 REDO，则从 future数组中取出最后一个元素，并把当前的树放进past 数组里。
+
+```
+    case actions.UNDO:
+      return {
+        ...state,
+        future: [...state.future, state.tree],
+        tree: state.past.pop()!
+      };
+    case actions.REDO:
+      return {
+        ...state,
+        past: [...state.past, state.tree],
+        tree: state.future.pop()!
+      };
+```
+
 ### “点击空白处” 事件
 在 ESTv2 中，我们希望用户在编辑完一个节点后，可以直观地通过点击空白处来退出编辑模式。那么，onClick 应该放在哪里呢？
 

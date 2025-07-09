@@ -12,7 +12,7 @@ Atlassian 的客服部门使用自研的 “客服工单队列管理系统” (S
 
 在这个系统中，我负责的内容有：
 - Ticket Queue page 的 GraphQL 性能优化
--  Team Health page 这一功能的开发，让客服经理可以对组内客服的状态一目了然，提高人效。
+- Team Health page 这一功能的开发，让客服经理可以对组内客服的状态一目了然，提高人效。
 
 ![](/img/team-health-page.jpeg)
 
