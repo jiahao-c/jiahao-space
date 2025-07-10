@@ -21,9 +21,7 @@
 工具链接：https://jiahao-c.github.io/EasySyntaxTree/
 项目代码：https://github.com/jiahao-c/easysyntaxtree
 
-当时遇到的有三个主要难点，首先是句法树图形的绘制。当时我尝试了之后发现，d3内置的树图，它没有办法实现语言学句法树所需要的那种严格的样式要求。所以我只能自己写算法来实现计算每个节点和连接线的坐标。拿节点来说吧，Y还好，直接看这个节点在树中的高度，
-
-但是X的话，就得根据每个子节点的X加起来再除以子节点数量，这样确保父节点在所有子字节点正上方的中间。然后计算连接线的坐标，不仅得考虑父节点子节点的坐标，还得考虑文字的宽度，这样才能保证这个点刚好落在文字的中间。
+当时遇到的有三个主要难点，首先是句法树图形的绘制。当时我尝试了之后发现，d3内置的树图，没有办法实现语言学句法树所需要的那种严格的样式要求。所以我只能自己写算法来实现计算每个节点和连接线的坐标。拿节点来说吧，Y还好，直接看这个节点在树中的高度，但是X的话，就得根据每个子节点的X加起来再除以子节点数量，这样确保父节点在所有子字节点正上方的中间。然后计算连接线的坐标，不仅得考虑父节点子节点的坐标，还得考虑文字的宽度，这样才能保证这个点刚好落在文字的中间。
 
 第二个是实现任意节点的编辑。我一开始设计的句法树的序列化里面，只存节点内容和children，但是这样点击的时候没法定位到，所以，我每次渲染点，先给每个节点生成id，id是行序遍历的index。然后onclick的时候，把id传过去，根据ID来定位节点，然后更新数据。
 
@@ -31,7 +29,7 @@
 
 交换过程中，我会把原来子树和目标子树都先flatten成为一个一维数组，这块我用了一个前序遍历，把里面所有的节点都提出来，同时也保留children信息。
 
-句法图的存储结构：
+### 数据存储结构
 ```javascript
 [
   {
@@ -66,6 +64,8 @@ flatten 后的结构：
 ]
 ```
 
+
+### 回看第一版代码
 虽然当时前端水平很菜，项目代码几乎全部放在了一个 400 多行的 js 文件里，甚至连工具栏的几个图标都对不齐，但当最终写完，实现了在一个 `<svg>` 里通过 d3 来可视化节点添加、编辑、删除、拖拽、SVG/PNG 导出 等功能的那一刻，还是非常兴奋和有成就感的。我再也不用盯着一堆方括号练习视力了！
 
 ![](/img/estv1.gif)
@@ -118,43 +118,9 @@ export interface StateType {
       };
 ```
 
-### “点击空白处” 事件
-在 ESTv2 中，我们希望用户在编辑完一个节点后，可以直观地通过点击空白处来退出编辑模式。那么，onClick 应该放在哪里呢？
-
-我的解决方案是把它放在整个 svg 元素上：
-![](https://i.imgur.com/qv1Z8Gr.png)
-
-然后，对 svg 里的所有 elements 的事件处理时都加上 `stopPropgation()`，避免 bubble 到最外层的 svg 上。
-![](https://i.imgur.com/YD0Xxn5.png)
-
-
-后来，我意识到，“点击周围空白处” 其实是个很常见的事件需求。例如 arco 的 `<Modal>` 组件，默认也启用了 `maskClosable` 属性，使得“点击遮罩”时可以关闭 Modal。
-
-```jsx showLineNumbers
-const maskClickRef = useRef(false);
-
-const onClickMask = (e) => {
-    if (!maskClickRef.current) return;
-    maskClickRef.current = false;
-    if (!inExit.current && maskClosable && mask && e.target === e.currentTarget) {
-      setTimeout(() => {
-        onCancel();
-      }, 100);
-    }
-  };
-```
-
-这个 onClick 事件，也是放在 Modal 外层 div 上的：
-
-```jsx
-onClick={onClickMask}
-```
-
-不过由于咱的句法树编译器在编辑 node 时并不会创建一个 mask ，所以就放外层 svg 上也没啥问题hhh
-
 ### 三角形节点
 
-在语法树中，连接 leaf 节点的 edge 除了是直线外，也可能是一个三角形，用于表示 “这部分的内部还有结构，但没有完全展开画出来”。
+和常规的树图不同，在语法树中，连接 leaf 节点的 edge 除了是直线外，也可能是一个三角形，用于表示 “这部分的内部还有结构，但没有完全展开画出来”。
 
 当用户添加三角形子节点时，会调用 reducer 中的这个 action：
 
@@ -260,12 +226,9 @@ useEffect(()=>{
 </text>
 ```
 
-
 ###  Immutability
 
-上文中提到了 immutability，这是我最喜欢的函数式编程思想之一。
-
-在 JavaScript 中，对象属性是 mutable 的。但可变意味着容易出错，也不适合搭配 reducer 使用。
+上文中提到了 immutability，这是我最喜欢的函数式编程思想之一。在 JavaScript 中，对象属性是 mutable 的。但可变意味着容易出错，也不适合搭配 reducer 使用。
 
 因此我在此项目中，通过 immer 实现了这个特性。 Immer 是一个 JavaScript 库，可以方便地处理 immutable state。代码里所有用于 tree operations 的 mutable function，我都会用 immer 的 produce 包起来，得到一个 immutable 版本。
 
@@ -279,21 +242,78 @@ useEffect(()=>{
 
 ![](https://i.imgur.com/UCGlk62.png)
 
-### Linear Regression
 
-想要一个美观的树图， svg 得有合适的高度，否则就可能会变成这样：
+### 原地文本框
 
-![](https://i.imgur.com/WseMJZN.png)
-![](https://i.imgur.com/a3Gv8hS.png)
+在用 d3 实现的的第一版里，每个节点的文本编辑是 in-place 的。当一个双击事件被触发时，先用 `getBoundingClientRect` 拿到 node 的尺寸和位置，然后通过 `position: absolute` （最近的已经定位的祖先元素，即svg container） 以及 `left` 和 `top` 放一个 `<input>` 在相同的位置，再把节点里原本的 text 放到 input 的 value里，就可以实现 “双击直接原地编辑”了。
 
-怎么计算 svg 最佳的高度呢？首先，我搞了两个滑块，手动微调，对不同的 “树深” （1 到 16）进行了实验。（d3-hierarchy 自带 `HierarchyPointNode.depth`，可以很方便地获取树深）。然后，记录下不同“树深”的情况下最美观的 height 值。
+```javascript
+function editText(node) {
+    let boundingRect = document.getElementById(node.id).getBoundingClientRect();
+    let activeInput = d3.select('#textEdit')
+        .append("input")
+        .classed("overlay-input", true)
+        .attr("type", "text")
+        .attr("value", node.text)
+        .style("color", "red")
+        .style("background", "white")
+        .style("font-size", fontSize + "px")
+        .style("left", boundingRect.left + "px")
+        .style("top", boundingRect.top + "px")
+        .style("width", "80px")
+        .on("keypress", (item, index, element) => { //Press space to finish editing
+            if (d3.event.keyCode === 32 || d3.event.keyCode === 13) {
 
-![](https://i.imgur.com/gnSiLXX.png)
+                node.text = element[0].value;
+                renderSVG(renderTarget);
+                element[0].remove();
+            }
+        });
+    activeInput.node().focus();
+}
+```
 
-![](https://i.imgur.com/mFVwzHx.png)
+而在用 visx 实现的第二版中，这个功能是通过 React Portal 实现的，具体步骤如下：
 
-然后，通过在表格软件里生成一个 Linear Regression， 我找到了 best-fit line：`SVGHeight = 45 * treeDepth + 150`.
+首先，先用 `getBoundingClientRect` 得到整个svg的位置。
+      
+```jsx
+const svgRect = svgRef.current.getBoundingClientRect()
+```
 
-![](https://i.imgur.com/p8R41dW.png)
+再通过 id 从 visx 数据模型中找到被编辑的 node 的 x 和 y 坐标，进行计算，存下位置
 
-于是， 这个简单的公式就被用来计算默认的 SVG 高度了。当然，用户还是可以通过滑条来手动调节。
+```jsx showLineNumbers
+const editingNode = data.descendants().find((node: any) => node.data.id === editingNodeId);
+const fixedPositionX = svgRect.left + margin.left + nodeWithPosition.x;
+const fixedPositionY = svgRect.top + margin.top + nodeWithPosition.y;
+setPosition({ x: fixedPositionX, y: fixedPositionY });
+```
+
+最后，用portal把它放到body里，同时用 fixed 定位和很大的 zIndex 让它显示在正确的位置：
+
+```jsx showLineNumbers
+  return createPortal(
+    <input
+      ref={inputRef}
+      type="text"
+      value={editText}
+      onChange={(e) => setEditText(e.target.value)}
+      style={{
+        position: 'fixed',
+        left: position.x,
+        top: position.y,
+        zIndex: 9999,
+        boxSizing: 'border-box'
+      }}
+    />,
+    document.body
+  );
+};
+```
+
+
+
+### 回看框架选择
+
+在2021年写这个项目的时候，还没有 React flow 这种 Node 和 Edge 概念很清晰的、自带拖拽功能、原地编辑功能的，专门用于编辑 Graph 图的框架。因此当时选择了 Visx。但 visx 其实更适合静态的、通用的 “数据可视化”，例如绘制扇形、条形、折线等各种统计图，而不那么适合做树图编辑器。如果将来有精力，我应该会改用 React flow 做一版更好用的，功能更全面的编辑器～
