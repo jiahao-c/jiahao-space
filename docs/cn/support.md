@@ -8,7 +8,7 @@ sidebar_position: 3
 
 Atlassian 的客服部门使用自研的 “客服工单队列管理系统” (Support Ticket Queue Management Console) 来安排工作，分配工单。
 
-![](/img/symphony.jpeg) 
+![](/img/symphony.png) 
 
 在这个系统中，我负责的内容有：
 - Ticket Queue page 的 GraphQL 性能优化

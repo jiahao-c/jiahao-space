@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Optimizing GQL queries using dataloader and apollo cache
 
-![](/img/symphony.jpeg) 
+![](/img/symphony.png) 
 
 A ticket queue system uses GraphQL for data fetching.
 Tech stack:

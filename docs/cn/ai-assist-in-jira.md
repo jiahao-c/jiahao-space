@@ -8,9 +8,8 @@
 
 ## 功能要求
 - 客服打开工单时，可直接看到 AI 预先生成的 KB 推荐
-- 客服可对每条 KB 推荐的质量进行反馈
 - 客服可在输入框中聚合搜索，查找所需知识库文章
-- 客服可勾选知识库文章，由 AI 生成参考回复
+- 客服可选择知识库文章，由 AI 生成参考回复
 
 
 ## 项目架构
@@ -22,19 +21,57 @@ API：RESTful
 
 
 ## 项目难点
-- 项目时间很紧，从 PRD 到第一版上线只有 2 个月时间
-    - 小组内 4 个工程师需要从零完成前端、后端、Jira 插件等一系列开发任务
-    - 作为一个fullstack组，组内技能不均衡，3个工程师都偏后端，只有我偏前端
 - Jira 和 内部前端基建有诸多限制，这个项目是公司内第一个在 Jira DC 的 SDK 里嵌入 React 的项目，没有先例方案可以参考。
-- 项目启动前，设计师突然离职了，留下的 Figma 里只有一张供参考的设计图，距离完整的设计文件有很多欠缺。
-- 初版上线后，法务部门突然提出合规问题，需要紧急修复
+- 项目启动前，设计师突然离职了，留下的 Figma 里只有一张供参考的设计图，距离完整的设计文件有很多欠缺，需要我和产品经理协作完善设计和交互细节。
 
 ## 我的贡献
 - 主动制作交互流程文档，与产品经理对齐需求，明确加载、报错等各类场景的预期表现
 - 作为前端 feature lead，设计前端实现方案，通过实验验证可行性，拆解任务、理清依赖，稳步推进开发
-- 与产品经理、法务沟通，理解 HIPPA 合规需求，并在短时间内开发解决方案
 
-## 项目过程中我解决的技术问题 
+## 我解决的技术问题 
+
+### AI 生成工单回复
+
+项目的功能之一是，客服人员可以在工单的评论框里通过 AI 根据选中的知识库文章生成回复。
+
+![](/img/icreate-reply.png)
+
+在接到这个需求时，我首先将其实现拆分为两个主要部分：
+1. 在评论框的工具栏添加 AI 按钮 （需要用到 Jira DC 插件系统中用于自定义编译器的 API）
+3. 实现回复生成功能 （流式输出到评论框内）
+
+#### 拓展编辑器工具栏
+
+想要在 Jira DC 的编辑器工具栏增加一个按钮，得先在 Jira 插件的 `/resources/atlassian-plugin.xml`中用 [Jira Editor Registry](https://developer.atlassian.com/server/jira/platform/customizing-rich-text-editor-in-jira/) 来注册上按钮的 `<web-resource>`。
+
+:::note
+
+吐槽一下，关于[拓展编辑器工具栏的官网文档](https://developer.atlassian.com/server/jira/platform/extending-the-rich-text-editor-in-jira/)，已经N年没更新了，里面全是过时的信息和截图，导致我当时基本得靠翻最新的 Jira DC 源码来摸索...
+
+:::
+
+然后，在插件的前端代码中，手动在编辑器工具栏 DOM 里新建一个div，然后用 React 把按钮渲染进去：
+
+```jsx
+const toolBarElement = document.querySelector('.aui-toolbar2-primary');
+const buttonDiv = document.createElement('div');
+buttonDiv.id = 'ai-button-contrainer';
+buttonDiv.className = 'aui-buttons';
+toolBarElement.append(buttonDiv);
+
+ReactDOM.render(<AiEditorButton /> ,buttonDiv)
+```
+
+
+#### 流式输出回复到编辑器
+TODO:
+
+流式输出时转换格式 (从 markdown 到 Jira)
+流式输出 
+markdownToJira()
+entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormattedContent))
+
+
 ### 资源缓存问题
 背景：
 
@@ -81,27 +118,10 @@ API：RESTful
 </script>
 ```
 这样就确保了每次访问时，都能获取到最新的资源。虽然这个办法看上去比较丑，但由于这个特殊使用场景下的诸多限制（包括 Jira SDK的限制、内部前端基建的限制），这个方法是个切实可行的 workaround。
-、
 
-### 埋点问题
-
-数据科学方提的埋点需求之一是，记录用户折叠或展开 AI panel 的事件。问题是，Jira panel 的折叠按钮，是在 React 应用之外的，是 jira 页面本身 DOM 的一部分，我们无法在 React 应用里直接添加一个 onClick 来捕获这个事件。
-
-我想到的解决方案是，通过一个 MutationObserver 来监控 DOM 中其他 node 的属性变化。这样就实现了监听 DOM 内任意节点的属性变化事件：
-
-```javascript
-const toggleButton = document.querySelector('button[aria-label="..."]');
-const observerConfig = {attributes: true, attributeFilter: ['aria-expanded']};
-const observer = new MutationObserver(()=>{
-    if (toggleButton.getAttribute('aria-expanded') === 'false') {
-        analytics.sendEvent(...)
-    }
-})
-observer.observe(toggleButton, observerConfig);
-```
 
 ### 组件问题
-每条 KB 推荐需要以 “可预览折叠面板” 的方式显示，即展开前显示标题+前三行内容，展开后显示完整内容。 Atlassian 设计系统内没有"折叠面板"这种组件，没法直接拿来用。因此我自行实现了这个组件：
+在第一个版本中，每条 KB 推荐需要以 “可预览折叠面板” 的方式显示，即展开前显示标题+前三行内容，展开后显示完整内容。 Atlassian 设计系统内没有"折叠面板"这种组件，没法直接拿来用。因此我自行实现了这个组件：
 
 ![](/img/kb-ai-collapse.png)
 
@@ -124,16 +144,6 @@ const MarkdownContainer = styled.div`
 ```
 
 这种做法也会带来一个问题：`transition` 不能和 `line-clamp` 一起使用，因此原有的折叠-展开时的动画效果就没了。
-
-### Markdown 渲染下划线
-
-Markdown 语法本身并不包含“下划线”功能，因此在上游 API 返回的markdown中，下划线是用 `<u> </u>` 标签来表示的。想要正确渲染这个markdown，除了 `react-markdown` 之外，还需要用到 `rehype-raw`:
-
-```jsx
-<Markdown rehypePlugins={[rehypeRaw]}> ... </Markdown>
-```
-
-这样就可以正常渲染包含下划线的markdown了。
 
 ### 用 Custom Hook 减少 DOM 操作
 我们的 React panel 中很多地方要用到当前工单的元数据，例如 ticketKey, labels 等等。这些数据需要从外层 DOM 中抓取。如果每次都去直接 query DOM，会造成代码重复、也略微影响性能。因此我写了一个简单的 custom hook. 其中用到了 TS 中的 Partial，因为有时我们只需要取出其中几项 metadata 来用。
@@ -158,23 +168,3 @@ const useTicketMetadata = (): Partial<TicketMetadata> => {
 ```jsx
     const { labels } = useTicketMetaData();
 ```
-
-
-## 业务方和同事对我的反馈
-
-Rachel Sterns, TPM
-> In January, the AI Agent team lost their designer. Jiahao stepped up to take ownership of much of this work. He was thoughtful with visuals, seeking clarity, and validating assumptions. He was open to feedback, responsive to needs, and also still delivered on technical activities required. I believe we have made as much rapid progress as we have with this tool because Jiahao has performed so strongly as a leader.
-
-Jennee Natenzon, TPM:
-> Throughout the execution of the AI Assist program, Jiahao was a great partner. He was critical to the program’s success. Jiahao continuously brings clarity to the program. His efforts ensure a smooth development process, where everyone feels included and is on the same page. Examples: For AI Search, Jiahao clearly documented the user journey and UI. This ensured that we accounted for all the scenarios and the solution was comprehensive. When we learned of a new legal requirement for HIPPA customers, Jiahao helped to drive clarity and finalize the solution. He did this by listening to the problem statement, creating a process flow diagram, iterating on it based on feedback.  Jiahao ensured that the design process was collaborative and transparent. He made it easy to engage and often asked for feedback. He explained the rationale behind each option as well as the technical constraints. He always follows up and has proven to be incredibly reliable. 
-
-Tom Alberecht, Data Scientist:
-
-> Jiahao executes with great urgency and often has fixes deployed within hours of identifying a potential issue. When developing AI Agent Assist, he would often have bug fixes and smaller feature changes deployed within an hour or two, allowing for much faster iteration. Jiahao approaches problems with curiosity and proactively suggests several ways to solve a problem. For the AI Agent Assist project, he would often take the initiative to brainstorm a few proposals and reach out to get agreement/consensus from the team in order to make decisions more quickly and efficiently.
-
-Steven Wilkins, Senior Software Enginner
-> Jiahao was the primary contributor to the front-end work. Additionally, Jiahao is very productive in his work and is able to turn around issues very quickly allowing for rapid fixes. Jiahao’s contributions were instrumental in allowing us to launch search on time without issue.
-
-Bri Vargas, Senior Software Engineer
-
-> Jiahao’s proactivity has been essential to the team’s success this year. He is often the first to volunteer to take on new tasks, first to respond to customer questions, and frequently asks clarifying questions to make sure the rest of the team is on track with their own tasks. This proactivity was especially important during the AI Assist Search project during which Jiahao stretched in his role to also act as our UI/UX designer, making mockups often within minutes of a feature idea being brought to the table by stakeholders. The visuals he provided for feature design discussions allowed for quick alignment and was met with great feedback from stakeholder teams. In the end, his actions were essential to the quality and on-time delivery of the Search capability.
