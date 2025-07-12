@@ -38,7 +38,8 @@ API：RESTful
 
 在接到这个需求时，我首先将其实现拆分为两个主要部分：
 1. 在评论框的工具栏添加 AI 按钮 （需要用到 Jira DC 插件系统中用于自定义编译器的 API）
-3. 实现回复生成功能 （流式输出到评论框内）
+2. 在 DropDown Menu 的悬浮框中实现流式输出
+3. 将AI生成的内容插入到评论框内
 
 #### 拓展编辑器工具栏
 
@@ -66,10 +67,51 @@ ReactDOM.render(<AiEditorButton /> ,buttonDiv)
 #### 流式输出回复到编辑器
 TODO:
 
-流式输出时转换格式 (从 markdown 到 Jira)
-流式输出 
+
+Fetch and ReadableStream
+
+```javascript
+const response = await fetch(sseApi, {
+    method: 'POST',
+    body: payload,
+    credentials: 'include',
+    signal: abortController.signal,
+    mode: 'cors'
+})
+```
+
+```javascript
+const reader = body.getReader();
+const decoder = new TextDecoer('utf-8');
+let buffer = '';
+let done = false;
+
+while(!done) {
+    const {value, done: doneReading} = await reader.read();
+    done = doneReading;
+    const chunkValue = decoder.decode(value);
+    buffer = buffer + chunkValue;
+    const lines = buffer.split('\n');
+    while (lines.length > 1) {
+        const line = lines.shift();
+        const data = JSON.parse(line);
+    }
+}
+
+
+```
+
+:::note
+
+吐槽一下，Atlassian 的内部 AI 部门管这个 API 叫 Server-Streaming-Endpoint，导致我一开始以为这就是大家常提到的 SSE。后来才知道，李逵和李鬼...这个API跟Server Sent Event完全没关系。
+
+:::
+
+插入到编辑器
 markdownToJira()
 entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormattedContent))
+
+
 
 
 ### 资源缓存问题
