@@ -21,8 +21,9 @@ API：RESTful
 
 
 ## 项目难点
-- Jira 和 内部前端基建有诸多限制，这个项目是公司内第一个在 Jira DC 的 SDK 里嵌入 React 的项目，没有先例方案可以参考。
 - 项目启动前，设计师突然离职了，留下的 Figma 里只有一张供参考的设计图，距离完整的设计文件有很多欠缺，需要我和产品经理协作完善设计和交互细节。
+- Jira DC 和 内部前端基建有诸多限制，这个项目是公司内第一个在 Jira DC 的 SDK 里嵌入 React 的项目，没有先例方案可以参考。
+- 在开发这个项目时，Jira Cloud 的 AI 功能还没有上线，没法参考其UI设计和技术实现，只能摸着石头过河。
 
 ## 我的贡献
 - 主动制作交互流程文档，与产品经理对齐需求，明确加载、报错等各类场景的预期表现
@@ -64,21 +65,159 @@ ReactDOM.render(<AiEditorButton /> ,buttonDiv)
 ```
 
 
-#### 流式输出回复到编辑器
-TODO:
+#### 流式输出到编辑器
 
+在一开始写这个项目的时候，内部的 AI 服务还不支持 SSE，所以第一版中的流式输出是通过 ReadableStream 来实现的。
 
-Fetch and ReadableStream
-
+众所周知，fetch 所返回的 [Response.body](https://developer.mozilla.org/en-US/docs/Web/API/Response/body) 是一个 [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
 ```javascript
-const response = await fetch(sseApi, {
+const response = await fetch(api, {
     method: 'POST',
     body: payload,
     credentials: 'include',
-    signal: abortController.signal,
+    signal: abortController.signal, //用于abort请求
     mode: 'cors'
 })
 ```
+
+然后通过 streamingBody 方法来
+```javascript
+const streaming = streamingBody({
+			requestOptions,
+			cacheKey,
+			selectionType,
+			streamContentProcessor,
+			isComplete,
+			response,
+			body: response.body,
+			context,
+		});
+
+		for await (const item of streaming) {
+			streamCallback(item);
+			// If we have a response other than stream (which means there is an error), we should stop the streaming
+			if (item.type !== 'stream') {
+				return;
+			}
+		}
+```
+
+Async generator that reads the response stream, processes lines, and yields ResponseObject events.
+Reads chunks from ReadableStream, decodes, splits by newlines, parses JSON, and delegates to handlers. Yields incremental 'stream' events; finalizes with 'complete' or error.
+
+Logic/Techniques:
+Buffering: Handles incomplete lines across chunks.
+Async Iteration: Allows pausing/resuming for backpressure.
+Feature-Flag Integration: Initializes ADFStreamer only if ADF prompt is enabled.
+Error Catching: Wraps parsing in try-catch for malformed streams.
+
+```javascript
+async function* streamingBody({
+	requestOptions,
+	cacheKey,
+	context,
+	selectionType,
+	streamContentProcessor,
+	isComplete,
+	response,
+	body,
+}: {
+	requestOptions: SteamRequestOptions;
+	cacheKey: string;
+	context: AIExperienceMachineContextForRequest;
+	selectionType: SelectionType;
+	streamContentProcessor?: StreamContentProcessor;
+	isComplete?: IsComplete;
+	response: Response;
+	body: ReadableStream<Uint8Array>;
+}): AsyncGenerator<ResponseObject> {
+	try {
+		const reader = body.getReader();
+		const decoder = new TextDecoder('utf-8');
+		let buffer = '';
+		let done = false;
+
+		const adfPrompt =
+			context?.configItem?.adfPrompt &&
+			expValEqualsNoExposure('platform_editor_ai_iw_adf_streaming', 'isEnabled', true);
+		const adfStreamer = adfPrompt
+			? new ADFStreamer(context.editorView.state.schema, new JsonCloser())
+			: undefined;
+
+		const partial: LinePartial = {
+			type: 'markdown',
+			content: '',
+			meta: { inputOutputDiffRatio: '' },
+			rovoActions: [],
+		};
+
+		while (!done) {
+			const { value, done: doneReading } = await reader.read();
+			done = doneReading;
+			const chunkValue = decoder.decode(value);
+			buffer = buffer + chunkValue;
+			// Split the buffer by line breaks
+			const lines = buffer.split('\n');
+			// Process all complete lines, except for the last one (which might be incomplete)
+			while (lines.length > 1) {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				const line = lines.shift()!;
+				const data = JSON.parse(line);
+
+				if (data.generatedContent === null) {
+					return yield handleLineNoGeneratedContent({
+						requestOptions,
+						cacheKey,
+						streamContentProcessor,
+						partial,
+						data,
+						adfStreamer,
+						selectionType,
+						schema: context.editorView?.state?.schema,
+						isAdfPrompt: !!adfPrompt,
+					});
+				}
+
+				yield handleLine({
+					requestOptions,
+					cacheKey,
+					streamContentProcessor,
+					partial,
+					data,
+					adfStreamer,
+					selectionType,
+					schema: context.editorView?.state?.schema,
+					isAdfPrompt: !!adfPrompt,
+				});
+			}
+			// Keep the last (potentially incomplete) line in the buffer
+			buffer = lines[0];
+		}
+
+		return yield handleLoaded({
+			requestOptions,
+			cacheKey,
+			selectionType,
+			streamContentProcessor,
+			isComplete,
+			partial,
+			schema: context.editorView?.state?.schema,
+			isAdfPrompt: !!adfPrompt,
+		});
+	} catch (parsingError) {
+		return yield {
+			type: 'error',
+			errorInfo: {
+				apiName: getAPIName(requestOptions.endpoint),
+				failureReason: FAILURE_REASON.API_FAIL,
+				statusCode: response.status,
+				errorContent: sanitizeErrorContent(parsingError),
+			},
+		};
+	}
+}
+```
+
 
 ```javascript
 const reader = body.getReader();
@@ -97,15 +236,9 @@ while(!done) {
         const data = JSON.parse(line);
     }
 }
-
-
 ```
 
-:::note
-
-吐槽一下，Atlassian 的内部 AI 部门管这个 API 叫 Server-Streaming-Endpoint，导致我一开始以为这就是大家常提到的 SSE。后来才知道，李逵和李鬼...这个API跟Server Sent Event完全没关系。
-
-:::
+后来，AI Fetch 和 ReadableStream 来实现的：
 
 插入到编辑器
 markdownToJira()
