@@ -79,32 +79,16 @@ const response = await fetch(api, {
     mode: 'cors'
 })
 ```
-因此，可以通过一个 AsyncGenerator （永远 yield Promise 的generator） 来处理这个response 
+因此，可以通过一个 AsyncGenerator （yield Promise 的generator） 来处理这个response。这部分实现参考了 MDN 文档中[iterating over data from an API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of#iterating_over_async_generators) 的做法。
 ```javascript
 async function* streamingBody({
-	// 省略参数名 destructuring
-}: {
-	requestOptions: SteamRequestOptions;
-	cacheKey: string;
-	context: AIExperienceMachineContextForRequest;
-	selectionType: SelectionType;
-	streamContentProcessor?: StreamContentProcessor;
-	isComplete?: IsComplete;
-	response: Response;
-	body: ReadableStream<Uint8Array>;
-}): AsyncGenerator<ResponseObject> {
+	// ... 省略参数
+}: AsyncGenerator<ResponseObject> {
 	try {
-		const reader = body.getReader();
+		const reader = body.getReader(); //ReadableStreamDefaultReader<Uint8Array<ArrayBufferLike>>
 		const decoder = new TextDecoder('utf-8');
 		let buffer = '';
 		let done = false;
-
-		const adfPrompt =
-			context?.configItem?.adfPrompt &&
-			expValEqualsNoExposure('platform_editor_ai_iw_adf_streaming', 'isEnabled', true);
-		const adfStreamer = adfPrompt
-			? new ADFStreamer(context.editorView.state.schema, new JsonCloser())
-			: undefined;
 
 		const partial: LinePartial = {
 			type: 'markdown',
@@ -116,29 +100,14 @@ async function* streamingBody({
 		while (!done) {
 			const { value, done: doneReading } = await reader.read();
 			done = doneReading;
-			const chunkValue = decoder.decode(value);
+			const chunkValue = decoder.decode(value); //把binary data转换为UTF-8编码的 json string
 			buffer = buffer + chunkValue;
-			// Split the buffer by line breaks
+			// 用换行符来拆分buffer里的内容
 			const lines = buffer.split('\n');
-			// Process all complete lines, except for the last one (which might be incomplete)
+			// 处理每一行的内容
 			while (lines.length > 1) {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				const line = lines.shift()!;
-				const data = JSON.parse(line);
-
-				if (data.generatedContent === null) {
-					return yield handleLineNoGeneratedContent({
-						requestOptions,
-						cacheKey,
-						streamContentProcessor,
-						partial,
-						data,
-						adfStreamer,
-						selectionType,
-						schema: context.editorView?.state?.schema,
-						isAdfPrompt: !!adfPrompt,
-					});
-				}
+				const line = lines.shift()!; // 除了最后一行之外（没有换行符意味着可能还没完整输出出来）
+				const data = JSON.parse(line); // 把每一行内容parse成
 
 				yield handleLine({
 					requestOptions,
@@ -146,7 +115,6 @@ async function* streamingBody({
 					streamContentProcessor,
 					partial,
 					data,
-					adfStreamer,
 					selectionType,
 					schema: context.editorView?.state?.schema,
 					isAdfPrompt: !!adfPrompt,
@@ -177,6 +145,33 @@ async function* streamingBody({
 			},
 		};
 	}
+}
+```
+
+其中handleLine
+```javascript
+function handleLineGeneratedContent({
+	streamContentProcessor,
+	partial,
+	data,
+}: StreamHandlerProps): ResponseObject {
+	partial.content += data['generatedContent'];
+	if (
+		parsedHasExpectedKey('meta', data) &&
+		parsedHasExpectedKey('inputOutputDiffRatio', data.meta)
+	) {
+		partial.meta = {
+			inputOutputDiffRatio: data['meta']['inputOutputDiffRatio'],
+			loadingStatus: '',
+		};
+	}
+
+	return {
+		type: 'stream',
+		loadingStatus: partial.meta.loadingStatus,
+		markdown: partial.content,
+		...streamContentProcessor?.(partial.content),
+	};
 }
 ```
 
