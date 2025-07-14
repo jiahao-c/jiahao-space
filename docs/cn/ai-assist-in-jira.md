@@ -69,7 +69,7 @@ ReactDOM.render(<AiEditorButton /> ,buttonDiv)
 
 在一开始写这个项目的时候，内部的 AI 服务还不支持 SSE，所以第一版中的流式输出是通过 ReadableStream 来实现的。
 
-众所周知，fetch 所返回的 [Response.body](https://developer.mozilla.org/en-US/docs/Web/API/Response/body) 是一个 [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
+众所周知，fetch 所返回的 [Response.body](https://developer.mozilla.org/en-US/docs/Web/API/Response/body) 是一个 [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
 ```javascript
 const response = await fetch(api, {
     method: 'POST',
@@ -79,48 +79,10 @@ const response = await fetch(api, {
     mode: 'cors'
 })
 ```
-
-然后通过 streamingBody 方法来
-```javascript
-const streaming = streamingBody({
-			requestOptions,
-			cacheKey,
-			selectionType,
-			streamContentProcessor,
-			isComplete,
-			response,
-			body: response.body,
-			context,
-		});
-
-		for await (const item of streaming) {
-			streamCallback(item);
-			// If we have a response other than stream (which means there is an error), we should stop the streaming
-			if (item.type !== 'stream') {
-				return;
-			}
-		}
-```
-
-Async generator that reads the response stream, processes lines, and yields ResponseObject events.
-Reads chunks from ReadableStream, decodes, splits by newlines, parses JSON, and delegates to handlers. Yields incremental 'stream' events; finalizes with 'complete' or error.
-
-Logic/Techniques:
-Buffering: Handles incomplete lines across chunks.
-Async Iteration: Allows pausing/resuming for backpressure.
-Feature-Flag Integration: Initializes ADFStreamer only if ADF prompt is enabled.
-Error Catching: Wraps parsing in try-catch for malformed streams.
-
+因此，可以通过一个 AsyncGenerator （永远 yield Promise 的generator） 来处理这个response 
 ```javascript
 async function* streamingBody({
-	requestOptions,
-	cacheKey,
-	context,
-	selectionType,
-	streamContentProcessor,
-	isComplete,
-	response,
-	body,
+	// 省略参数名 destructuring
 }: {
 	requestOptions: SteamRequestOptions;
 	cacheKey: string;
@@ -217,6 +179,38 @@ async function* streamingBody({
 	}
 }
 ```
+
+然后通过 streamingBody 方法来
+```javascript
+const streaming = streamingBody({
+			requestOptions,
+			cacheKey,
+			selectionType,
+			streamContentProcessor,
+			isComplete,
+			response,
+			body: response.body,
+			context,
+		});
+
+		for await (const item of streaming) {
+			streamCallback(item);
+			// If we have a response other than stream (which means there is an error), we should stop the streaming
+			if (item.type !== 'stream') {
+				return;
+			}
+		}
+```
+
+Async generator that reads the response stream, processes lines, and yields ResponseObject events.
+Reads chunks from ReadableStream, decodes, splits by newlines, parses JSON, and delegates to handlers. Yields incremental 'stream' events; finalizes with 'complete' or error.
+
+Logic/Techniques:
+Buffering: Handles incomplete lines across chunks.
+Async Iteration: Allows pausing/resuming for backpressure.
+Feature-Flag Integration: Initializes ADFStreamer only if ADF prompt is enabled.
+Error Catching: Wraps parsing in try-catch for malformed streams.
+
 
 
 ```javascript
