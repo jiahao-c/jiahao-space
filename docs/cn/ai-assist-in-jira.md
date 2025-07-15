@@ -13,7 +13,7 @@
 
 
 ## 项目架构
-后端上游（由 AI 团队提供）：用于 KB 推荐、搜索、生成的 Restful API
+后端上游（由 AI 团队提供）：用于 KB 推荐、搜索、回复生成的 API
 
 后端：Spring Boot, DynamoDB, SQS
 API：RESTful
@@ -21,8 +21,9 @@ API：RESTful
 
 
 ## 项目难点
-- Jira 和 内部前端基建有诸多限制，这个项目是公司内第一个在 Jira DC 的 SDK 里嵌入 React 的项目，没有先例方案可以参考。
 - 项目启动前，设计师突然离职了，留下的 Figma 里只有一张供参考的设计图，距离完整的设计文件有很多欠缺，需要我和产品经理协作完善设计和交互细节。
+- Jira DC 和 内部前端基建有诸多限制，这个项目是公司内第一个在 Jira DC 的 SDK 里嵌入 React 的项目，没有先例方案可以参考。
+- 在开发项目第一版时，内部 AI 服务还不支持 SSE，因此只能通过用起来较为复杂的 Web Stream API 来实现流式输出
 
 ## 我的贡献
 - 主动制作交互流程文档，与产品经理对齐需求，明确加载、报错等各类场景的预期表现
@@ -34,12 +35,11 @@ API：RESTful
 
 项目的功能之一是，客服人员可以在工单的评论框里通过 AI 根据选中的知识库文章生成回复。
 
-![](/img/icreate-reply.png)
+![](/img/create-reply.png)
 
 在接到这个需求时，我首先将其实现拆分为两个主要部分：
-1. 在评论框的工具栏添加 AI 按钮 （需要用到 Jira DC 插件系统中用于自定义编译器的 API）
-2. 在 DropDown Menu 的悬浮框中实现流式输出
-3. 将AI生成的内容插入到评论框内
+1. 在评论框的工具栏添加 AI 按钮和 DropDown Menu（需要用到 Jira DC 插件系统中用于自定义编译器的 API）
+1. 在将AI生成的内容流式输出到评论框内
 
 #### 拓展编辑器工具栏
 
@@ -64,59 +64,81 @@ ReactDOM.render(<AiEditorButton /> ,buttonDiv)
 ```
 
 
-#### 流式输出回复到编辑器
-TODO:
+#### 获取 API 的流式输出
 
+一开始，内部 AI 服务还不支持 SSE，所以第一版中的流式输出是通过 Web Stream API 来实现的。
 
-Fetch and ReadableStream
-
+众所周知，fetch 所返回的 [Response.body](https://developer.mozilla.org/en-US/docs/Web/API/Response/body) 是一个 [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)，并且， promise 在收到 header 后就会resolve， 而不会等整个body都stream完才resolve。所以我们可以先 await 这个请求：
 ```javascript
-const response = await fetch(sseApi, {
+const response = await fetch(api, {
     method: 'POST',
     body: payload,
     credentials: 'include',
-    signal: abortController.signal,
+    signal: abortController.signal, //用于abort请求
     mode: 'cors'
 })
 ```
 
+然后通过一个 AsyncGenerator （yield Promise 的generator） 来流式处理这个response。
 ```javascript
-const reader = body.getReader();
-const decoder = new TextDecoer('utf-8');
-let buffer = '';
-let done = false;
+async function* streamingContent({
+	// ... 各种参数
+}{
+	const reader = body.getReader(); //ReadableStreamDefaultReader<Uint8Array<ArrayBufferLike>>
+	const decoder = new TextDecoder('utf-8'); //由于服务返回的是binary data，得先解码
+	let buffer = ''; //用buffer解决数据可能不完整的问题
+	let done = false;
 
-while(!done) {
-    const {value, done: doneReading} = await reader.read();
-    done = doneReading;
-    const chunkValue = decoder.decode(value);
-    buffer = buffer + chunkValue;
-    const lines = buffer.split('\n');
-    while (lines.length > 1) {
-        const line = lines.shift();
-        const data = JSON.parse(line);
-    }
+	while (!done) {
+		const { value, done: doneReading } = await reader.read();
+		done = doneReading;
+		const chunkValue = decoder.decode(value); //把binary data转换为UTF-8编码的markdown
+		buffer = buffer + chunkValue;
+		const lines = buffer.split('\n'); 
+		while (lines.length > 1) { // >1 而不是 >0，因为最后一行可能还没完整输出出来
+			const line = lines.shift()!; // 对 queue 中最前面的内容进行处理
+			yield line; 
+		}
+		// 把最后一行放回buffer里
+		buffer = lines[0];
+	}
 }
-
-
 ```
 
-:::note
+#### 流式插入到编辑器
 
-吐槽一下，Atlassian 的内部 AI 部门管这个 API 叫 Server-Streaming-Endpoint，导致我一开始以为这就是大家常提到的 SSE。后来才知道，李逵和李鬼...这个API跟Server Sent Event完全没关系。
+在用上面的async generator 接收到内容后，我们可以用 `for await` 的方式来将其进行格式转换并插入到编辑器里：
 
-:::
+```javascript
+async function startStreaming(/*...各种参数*/){
+	//通过上面的 async generator，获取一个 async iterable
+	const streaming = streamingContent({/*...各种参数*/});
 
-插入到编辑器
-markdownToJira()
-entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormattedContent))
+	for await (const item of streaming) {
+		const jiraFormatText = markdownToJira(item);
+		// 把内容插入到编辑器中
+		entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormatText))
+	}
+}
+```
 
+#### SSE
 
+后来，内部AI服务新增了对 SSE 的支持，并且可以自动分行并输出markdown格式，于是第二版中的流式输出改为使用更简单的 SSE 来实现，大幅简化了这部分代码：
 
+```javascript
+function startSSEStreaming(apiUrl) {
+    const eventSource = new EventSource(apiUrl, { withCredentials: true });
+
+    eventSource.onmessage = function(event) {
+        const jiraFormatText = markdownToJira(event.data);
+        entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormatText));
+    };
+}
+```
 
 ### 资源缓存问题
 背景：
-
 
 首先，Jira DC SDK 默认不支持 React，只支持 Apache Velocity（只有 Jira Cloud 的 SDK 对 React 支持较好）。 因此我需要通过一些 workaround 来实现在 Jira web panel 中内嵌 React，也就是将 script tag 硬编码在插件的 Apache Velocity 模版中。当 jira 页面加载出 panel 后，浏览器再去加载和执行这一行 script，最终将 react 应用渲染到页面的指定 div 中。
 
