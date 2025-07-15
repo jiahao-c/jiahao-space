@@ -13,7 +13,7 @@
 
 
 ## 项目架构
-后端上游（由 AI 团队提供）：用于 KB 推荐、搜索、回复生成的 API
+后端上游（由 AI 团队提供）：用于 KB 推荐、搜索、和生成的 API
 
 后端：Spring Boot, DynamoDB, SQS
 API：RESTful
