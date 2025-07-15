@@ -13,7 +13,7 @@
 
 
 ## 项目架构
-后端上游（由 AI 团队提供）：用于 KB 推荐、搜索、生成的 Restful API
+后端上游（由 AI 团队提供）：用于 KB 推荐、搜索、回复生成的 API
 
 后端：Spring Boot, DynamoDB, SQS
 API：RESTful
@@ -23,7 +23,7 @@ API：RESTful
 ## 项目难点
 - 项目启动前，设计师突然离职了，留下的 Figma 里只有一张供参考的设计图，距离完整的设计文件有很多欠缺，需要我和产品经理协作完善设计和交互细节。
 - Jira DC 和 内部前端基建有诸多限制，这个项目是公司内第一个在 Jira DC 的 SDK 里嵌入 React 的项目，没有先例方案可以参考。
-- 在开发这个项目时，Jira Cloud 的 AI 功能还没有上线，没法参考其UI设计和技术实现，只能摸着石头过河。
+- 在开发项目第一版时，内部 AI 服务还不支持 SSE，因此只能通过用起来较为复杂的 Web Stream API 来实现流式输出
 
 ## 我的贡献
 - 主动制作交互流程文档，与产品经理对齐需求，明确加载、报错等各类场景的预期表现
@@ -35,12 +35,11 @@ API：RESTful
 
 项目的功能之一是，客服人员可以在工单的评论框里通过 AI 根据选中的知识库文章生成回复。
 
-![](/img/icreate-reply.png)
+![](/img/create-reply.png)
 
 在接到这个需求时，我首先将其实现拆分为两个主要部分：
-1. 在评论框的工具栏添加 AI 按钮 （需要用到 Jira DC 插件系统中用于自定义编译器的 API）
-2. 在 DropDown Menu 的悬浮框中实现流式输出
-3. 将AI生成的内容插入到评论框内
+1. 在评论框的工具栏添加 AI 按钮和 DropDown Menu（需要用到 Jira DC 插件系统中用于自定义编译器的 API）
+1. 在将AI生成的内容流式输出到评论框内
 
 #### 拓展编辑器工具栏
 
@@ -65,11 +64,11 @@ ReactDOM.render(<AiEditorButton /> ,buttonDiv)
 ```
 
 
-#### 流式输出到编辑器
+#### 获取 API 的流式输出
 
-在一开始写这个项目的时候，内部的 AI 服务还不支持 SSE，所以第一版中的流式输出是通过 ReadableStream 来实现的。
+一开始，内部 AI 服务还不支持 SSE，所以第一版中的流式输出是通过 Web Stream API 来实现的。
 
-众所周知，fetch 所返回的 [Response.body](https://developer.mozilla.org/en-US/docs/Web/API/Response/body) 是一个 [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+众所周知，fetch 所返回的 [Response.body](https://developer.mozilla.org/en-US/docs/Web/API/Response/body) 是一个 [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)，并且， promise 在收到 header 后就会resolve， 而不会等整个body都stream完才resolve。所以我们可以先 await 这个请求：
 ```javascript
 const response = await fetch(api, {
     method: 'POST',
@@ -79,166 +78,67 @@ const response = await fetch(api, {
     mode: 'cors'
 })
 ```
-因此，可以通过一个 AsyncGenerator （yield Promise 的generator） 来处理这个response。这部分实现参考了 MDN 文档中[iterating over data from an API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of#iterating_over_async_generators) 的做法。
+
+然后通过一个 AsyncGenerator （yield Promise 的generator） 来流式处理这个response。
 ```javascript
-async function* streamingBody({
-	// ... 省略参数
-}: AsyncGenerator<ResponseObject> {
-	try {
-		const reader = body.getReader(); //ReadableStreamDefaultReader<Uint8Array<ArrayBufferLike>>
-		const decoder = new TextDecoder('utf-8');
-		let buffer = '';
-		let done = false;
+async function* streamingContent({
+	// ... 各种参数
+}{
+	const reader = body.getReader(); //ReadableStreamDefaultReader<Uint8Array<ArrayBufferLike>>
+	const decoder = new TextDecoder('utf-8'); //由于服务返回的是binary data，得先解码
+	let buffer = ''; //用buffer解决数据可能不完整的问题
+	let done = false;
 
-		const partial: LinePartial = {
-			type: 'markdown',
-			content: '',
-			meta: { inputOutputDiffRatio: '' },
-			rovoActions: [],
-		};
-
-		while (!done) {
-			const { value, done: doneReading } = await reader.read();
-			done = doneReading;
-			const chunkValue = decoder.decode(value); //把binary data转换为UTF-8编码的 json string
-			buffer = buffer + chunkValue;
-			// 用换行符来拆分buffer里的内容
-			const lines = buffer.split('\n');
-			// 处理每一行的内容
-			while (lines.length > 1) {
-				const line = lines.shift()!; // 除了最后一行之外（没有换行符意味着可能还没完整输出出来）
-				const data = JSON.parse(line); // 把每一行内容parse成
-
-				yield handleLine({
-					requestOptions,
-					cacheKey,
-					streamContentProcessor,
-					partial,
-					data,
-					selectionType,
-					schema: context.editorView?.state?.schema,
-					isAdfPrompt: !!adfPrompt,
-				});
-			}
-			// Keep the last (potentially incomplete) line in the buffer
-			buffer = lines[0];
+	while (!done) {
+		const { value, done: doneReading } = await reader.read();
+		done = doneReading;
+		const chunkValue = decoder.decode(value); //把binary data转换为UTF-8编码的markdown
+		buffer = buffer + chunkValue;
+		const lines = buffer.split('\n'); 
+		while (lines.length > 1) { // >1 而不是 >0，因为最后一行可能还没完整输出出来
+			const line = lines.shift()!; // 对 queue 中最前面的内容进行处理
+			yield line; 
 		}
-
-		return yield handleLoaded({
-			requestOptions,
-			cacheKey,
-			selectionType,
-			streamContentProcessor,
-			isComplete,
-			partial,
-			schema: context.editorView?.state?.schema,
-			isAdfPrompt: !!adfPrompt,
-		});
-	} catch (parsingError) {
-		return yield {
-			type: 'error',
-			errorInfo: {
-				apiName: getAPIName(requestOptions.endpoint),
-				failureReason: FAILURE_REASON.API_FAIL,
-				statusCode: response.status,
-				errorContent: sanitizeErrorContent(parsingError),
-			},
-		};
+		// 把最后一行放回buffer里
+		buffer = lines[0];
 	}
 }
 ```
 
-其中handleLine
+#### 流式插入到编辑器
+
+在用上面的async generator 接收到内容后，我们可以用 `for await` 的方式来将其进行格式转换并插入到编辑器里：
+
 ```javascript
-function handleLineGeneratedContent({
-	streamContentProcessor,
-	partial,
-	data,
-}: StreamHandlerProps): ResponseObject {
-	partial.content += data['generatedContent'];
-	if (
-		parsedHasExpectedKey('meta', data) &&
-		parsedHasExpectedKey('inputOutputDiffRatio', data.meta)
-	) {
-		partial.meta = {
-			inputOutputDiffRatio: data['meta']['inputOutputDiffRatio'],
-			loadingStatus: '',
-		};
+async function startStreaming(/*...各种参数*/){
+	//通过上面的 async generator，获取一个 async iterable
+	const streaming = streamingContent({/*...各种参数*/});
+
+	for await (const item of streaming) {
+		const jiraFormatText = markdownToJira(item);
+		// 把内容插入到编辑器中
+		entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormatText))
 	}
-
-	return {
-		type: 'stream',
-		loadingStatus: partial.meta.loadingStatus,
-		markdown: partial.content,
-		...streamContentProcessor?.(partial.content),
-	};
 }
 ```
 
-然后通过 streamingBody 方法来
-```javascript
-const streaming = streamingBody({
-			requestOptions,
-			cacheKey,
-			selectionType,
-			streamContentProcessor,
-			isComplete,
-			response,
-			body: response.body,
-			context,
-		});
+#### SSE
 
-		for await (const item of streaming) {
-			streamCallback(item);
-			// If we have a response other than stream (which means there is an error), we should stop the streaming
-			if (item.type !== 'stream') {
-				return;
-			}
-		}
-```
-
-Async generator that reads the response stream, processes lines, and yields ResponseObject events.
-Reads chunks from ReadableStream, decodes, splits by newlines, parses JSON, and delegates to handlers. Yields incremental 'stream' events; finalizes with 'complete' or error.
-
-Logic/Techniques:
-Buffering: Handles incomplete lines across chunks.
-Async Iteration: Allows pausing/resuming for backpressure.
-Feature-Flag Integration: Initializes ADFStreamer only if ADF prompt is enabled.
-Error Catching: Wraps parsing in try-catch for malformed streams.
-
-
+后来，内部AI服务新增了对 SSE 的支持，并且可以自动分行并输出markdown格式，于是第二版中的流式输出改为使用更简单的 SSE 来实现，大幅简化了这部分代码：
 
 ```javascript
-const reader = body.getReader();
-const decoder = new TextDecoer('utf-8');
-let buffer = '';
-let done = false;
+function startSSEStreaming(apiUrl) {
+    const eventSource = new EventSource(apiUrl, { withCredentials: true });
 
-while(!done) {
-    const {value, done: doneReading} = await reader.read();
-    done = doneReading;
-    const chunkValue = decoder.decode(value);
-    buffer = buffer + chunkValue;
-    const lines = buffer.split('\n');
-    while (lines.length > 1) {
-        const line = lines.shift();
-        const data = JSON.parse(line);
-    }
+    eventSource.onmessage = function(event) {
+        const jiraFormatText = markdownToJira(event.data);
+        entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormatText));
+    };
 }
 ```
-
-后来，AI Fetch 和 ReadableStream 来实现的：
-
-插入到编辑器
-markdownToJira()
-entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormattedContent))
-
-
-
 
 ### 资源缓存问题
 背景：
-
 
 首先，Jira DC SDK 默认不支持 React，只支持 Apache Velocity（只有 Jira Cloud 的 SDK 对 React 支持较好）。 因此我需要通过一些 workaround 来实现在 Jira web panel 中内嵌 React，也就是将 script tag 硬编码在插件的 Apache Velocity 模版中。当 jira 页面加载出 panel 后，浏览器再去加载和执行这一行 script，最终将 react 应用渲染到页面的指定 div 中。
 
