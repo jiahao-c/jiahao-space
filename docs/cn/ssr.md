@@ -97,6 +97,8 @@ if (isCSR) {
 
 - window, document, localStorage 这些浏览器 API 在服务器端都没有，用的时候要检查是不是在client side code里。例如，如果要用 `window.CSS.supports(...)` 检查浏览器是否支持一个属性，需要先 `(if window.CSS && window.CSS.supports)`.
 
+- `useLayoutEffect` 也没法直接在服务器端运行，所以需要使用 `const useIsomorphicLayoutEffect = isSSR ? useEffect : useLayoutEffect;`
+
 #### 自动 scroll to fragment
 - 社区主页里有一个 "报名表"。预期行为是，当 URL 里带 `#apply` 这个 fragment，就自动滚动到这个表的位置。 在 CSR 版本的代码中，我们得把它写 useEffect 里：
 ```jsx
