@@ -107,7 +107,7 @@ async function* streamingContent({
 
 #### 流式插入到编辑器
 
-在用上面的async generator 接收到内容后，我们可以用 `for await` 的方式来将其进行格式转换并插入到编辑器里：
+在用上面的async generator 接收到内容后，我们可以用 `for await` 的方式来将其进行格式转换并插入到编辑器里。由于 LLM 返回的是 markdown，在插入先，还需要先转换为 Jira DC 所使用的 [Wiki Markup](https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all)
 
 ```javascript
 async function startStreaming(/*...各种参数*/){
