@@ -70,11 +70,14 @@ ReactDOM.render(<AiEditorButton /> ,buttonDiv)
 
 众所周知，fetch 所返回的 [Response.body](https://developer.mozilla.org/en-US/docs/Web/API/Response/body) 是一个 [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)，并且， promise 在收到 header 后就会resolve， 而不会等整个body都stream完才resolve。所以我们可以先 await 这个请求：
 ```javascript
+
+const payload = {"selectedArticleID": xxx, "searchId": yyy};
+
 const response = await fetch(api, {
     method: 'POST',
     body: payload,
     credentials: 'include',
-    signal: abortController.signal, //用于abort请求
+    signal: abortController.signal,
     mode: 'cors'
 })
 ```
@@ -124,12 +127,14 @@ async function startStreaming(/*...各种参数*/){
 
 #### SSE
 
-后来，内部AI服务新增了对 SSE 的支持，并且可以自动分行并输出markdown格式，于是第二版中的流式输出改为使用更简单的 SSE 来实现，大幅简化了这部分代码：
+后来，内部AI服务新增了对 SSE 的支持，并且可以自动分行并输出markdown格式，于是第二版中的流式输出改为使用更简单的 SSE 来实现，大幅简化了这部分代码。
 
 ```javascript
-function startSSEStreaming(apiUrl) {
-    const eventSource = new EventSource(apiUrl, { withCredentials: true });
-
+function startSSEStreaming() {
+     /* EventSource 只支持 GET，还好我们只需要传两个参数，所以可以直接放在 query params 里*/
+    const queryUrl = `${sseApiUrl}?searchId=${searchId}&selectedArticleId=${selectedArticleId}`;
+    const eventSource = new EventSource(queryUrl, { withCredentials: true });
+    
     eventSource.onmessage = function(event) {
         const jiraFormatText = markdownToJira(event.data);
         entry.applyIfTextMode(() => addWikiMarkup(entry, jiraFormatText));
