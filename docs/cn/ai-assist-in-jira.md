@@ -15,8 +15,10 @@
 ## 项目架构
 
 后端上游（由 AI 团队提供）：用于 KB 推荐、搜索(基于 elastic search / RAG)、和生成(基于 LLM)的 API 
+
 后端：Spring Boot, DynamoDB, SQS
-API：RESTful
+
+
 前端：React（通过 [web panel](https://developer.atlassian.com/server/jira/platform/web-panel/) 内嵌在Jira中）
 
 
